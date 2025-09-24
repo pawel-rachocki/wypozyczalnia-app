@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "samochody")
@@ -37,6 +39,9 @@ public class Samochod {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,length = 20)
     private StatusSamochodu status;
+
+    @OneToMany(mappedBy = "samochod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 
     public Samochod(String marka, String model, BigDecimal cenaZaDzien, StatusSamochodu status) {
         this.marka = marka;

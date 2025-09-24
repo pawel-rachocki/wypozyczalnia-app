@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "klienci")
 @Data
@@ -34,6 +37,9 @@ public class Klient {
     @Email(message = "Email musi mieć prawidłowy format")
     @Column(nullable = false,unique = true,length = 255)
     private String email;
+
+    @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 
     public Klient(String imie, String nazwisko, String email) {
         this.imie = imie;
