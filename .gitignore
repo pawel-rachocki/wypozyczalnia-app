@@ -1,0 +1,39 @@
+# Spring Boot Backend
+car-rental-backend/target/
+car-rental-backend/.mvn/wrapper/maven-wrapper.jar
+car-rental-backend/.mvn/wrapper/maven-wrapper.properties
+car-rental-backend/src/main/resources/application-*.properties
+
+# Angular Frontend
+car-rental-frontend/node_modules/
+car-rental-frontend/dist/
+car-rental-frontend/.angular/
+car-rental-frontend/coverage/
+car-rental-frontend/e2e/reports/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker
+postgres_data/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Temporary files
+*.tmp
+*.swp
+*~
