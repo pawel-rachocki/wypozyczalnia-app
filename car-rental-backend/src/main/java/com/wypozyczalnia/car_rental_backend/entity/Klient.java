@@ -1,6 +1,7 @@
 package com.wypozyczalnia.car_rental_backend.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +39,7 @@ public class Klient {
     @Column(nullable = false,unique = true,length = 255)
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 

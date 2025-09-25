@@ -1,5 +1,6 @@
 package com.wypozyczalnia.car_rental_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +42,7 @@ public class Samochod {
     @Column(nullable = false,length = 20)
     private StatusSamochodu status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "samochod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 
