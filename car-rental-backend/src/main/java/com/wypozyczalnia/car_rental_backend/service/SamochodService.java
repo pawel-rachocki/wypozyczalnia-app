@@ -4,7 +4,6 @@ import com.wypozyczalnia.car_rental_backend.entity.Samochod;
 import com.wypozyczalnia.car_rental_backend.entity.StatusSamochodu;
 import com.wypozyczalnia.car_rental_backend.repository.SamochodRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class SamochodService {
 
@@ -23,19 +21,15 @@ public class SamochodService {
     // ===== OPERACJE CRUD =====
 
     public List<Samochod> findAll() {
-        log.debug("Pobieranie wszystkich samochodów");
         return samochodRepository.findAll();
     }
 
     public Optional<Samochod> findById(Long id) {
-        log.debug("Pobieranie samochodu o ID: {}", id);
         return samochodRepository.findById(id);
     }
 
     @Transactional
     public Samochod save(Samochod samochod) {
-        log.info("Zapisywanie nowego samochodu: {} {}", samochod.getMarka(), samochod.getModel());
-
         validateSamochod(samochod);
 
         if (samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase(
@@ -50,14 +44,11 @@ public class SamochodService {
         }
 
         Samochod saved = samochodRepository.save(samochod);
-        log.info("Zapisano samochód z ID: {}", saved.getId());
         return saved;
     }
 
     @Transactional
     public Samochod update(Long id, Samochod samochodUpdate) {
-        log.info("Aktualizacja samochodu o ID: {}", id);
-
         Samochod existing = samochodRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Samochód o ID " + id + " nie istnieje"));
 
@@ -80,14 +71,11 @@ public class SamochodService {
         existing.setStatus(samochodUpdate.getStatus());
 
         Samochod updated = samochodRepository.save(existing);
-        log.info("Zaktualizowano samochód: {} {}", updated.getMarka(), updated.getModel());
         return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-        log.info("Usuwanie samochodu o ID: {}", id);
-
         Samochod samochod = samochodRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Samochód o ID " + id + " nie istnieje"));
 
@@ -96,39 +84,31 @@ public class SamochodService {
         }
 
         samochodRepository.deleteById(id);
-        log.info("Usunięto samochód: {} {}", samochod.getMarka(), samochod.getModel());
     }
 
     public List<Samochod> findAvailable() {
-        log.debug("Pobieranie dostępnych samochodów");
         return samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY);
     }
 
     public List<Samochod> findByMarka(String marka) {
-        log.debug("Pobieranie samochodów marki: {}", marka);
         return samochodRepository.findByMarkaIgnoreCaseOrderByModelAsc(marka);
     }
 
     public List<Samochod> findByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        log.debug("Pobieranie samochodów w przedziale cenowym: {} - {}", minPrice, maxPrice);
         return samochodRepository.findByCenaZaDzienBetweenOrderByCenaZaDzienAsc(minPrice, maxPrice);
     }
 
     public List<Samochod> findAvailableByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        log.debug("Pobieranie dostępnych samochodów w przedziale cenowym: {} - {}", minPrice, maxPrice);
         return samochodRepository.findByStatusAndCenaZaDzienBetweenOrderByCenaZaDzienAsc(
                 StatusSamochodu.DOSTEPNY, minPrice, maxPrice);
     }
 
     public List<Samochod> search(String searchTerm) {
-        log.debug("Wyszukiwanie samochodów po frazje: {}", searchTerm);
         return samochodRepository.findByMarkaOrModelContainingIgnoreCase(searchTerm);
     }
 
     @Transactional
     public void markAsRented(Long id) {
-        log.info("Oznaczanie samochodu o ID {} jako wypożyczony", id);
-
         Samochod samochod = samochodRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Samochód o ID " + id + " nie istnieje"));
 
@@ -138,19 +118,15 @@ public class SamochodService {
 
         samochod.setStatus(StatusSamochodu.WYPOZYCZONY);
         samochodRepository.save(samochod);
-        log.info("Samochód {} {} oznaczony jako wypożyczony", samochod.getMarka(), samochod.getModel());
     }
 
     @Transactional
     public void markAsAvailable(Long id) {
-        log.info("Oznaczanie samochodu o ID {} jako dostępny", id);
-
         Samochod samochod = samochodRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Samochód o ID " + id + " nie istnieje"));
 
         samochod.setStatus(StatusSamochodu.DOSTEPNY);
         samochodRepository.save(samochod);
-        log.info("Samochód {} {} oznaczony jako dostępny", samochod.getMarka(), samochod.getModel());
     }
 
     public boolean isAvailable(Long id) {

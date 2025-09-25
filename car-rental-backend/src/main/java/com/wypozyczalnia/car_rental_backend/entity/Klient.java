@@ -1,6 +1,8 @@
 package com.wypozyczalnia.car_rental_backend.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "klienci")
 @Data
@@ -38,6 +41,7 @@ public class Klient {
     @Column(nullable = false,unique = true,length = 255)
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 

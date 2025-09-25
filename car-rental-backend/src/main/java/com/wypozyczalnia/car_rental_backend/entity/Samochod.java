@@ -1,7 +1,10 @@
 package com.wypozyczalnia.car_rental_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "samochody")
 @Data
@@ -30,16 +34,17 @@ public class Samochod {
     @Column(nullable = false,length = 50)
     private String model;
 
-    @NotBlank(message = "Atrybut (cena za dzień) jest wymagany")
+    @NotNull(message = "Atrybut (cena za dzień) jest wymagany")
     @Positive(message = "Cena za dzień musi być większa od zera")
     @Column(name = "cena_za_dzien", nullable = false, precision = 10, scale = 2)
     private BigDecimal cenaZaDzien;
 
-    @NotBlank(message = "Atrybut (status) jest wymagany")
+    @NotNull(message = "Atrybut (status) jest wymagany")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,length = 20)
     private StatusSamochodu status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "samochod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
 

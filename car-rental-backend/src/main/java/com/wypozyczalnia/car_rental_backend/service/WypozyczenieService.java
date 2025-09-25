@@ -6,7 +6,6 @@ import com.wypozyczalnia.car_rental_backend.entity.StatusWypozyczenia;
 import com.wypozyczalnia.car_rental_backend.entity.Wypozyczenie;
 import com.wypozyczalnia.car_rental_backend.repository.WypozyczenieRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class WypozyczenieService {
 
@@ -29,19 +27,15 @@ public class WypozyczenieService {
     // ===== OPERACJE CRUD =====
 
     public List<Wypozyczenie> findAll() {
-        log.debug("Pobieranie wszystkich wypożyczeń");
         return wypozyczenieRepository.findAll();
     }
 
     public Optional<Wypozyczenie> findById(Long id) {
-        log.debug("Pobieranie wypożyczenia o ID: {}", id);
         return wypozyczenieRepository.findById(id);
     }
 
     @Transactional
     public Wypozyczenie rentCar(Long klientId, Long samochodId, LocalDate dataWypozyczenia, LocalDate planowanaDataZwrotu) {
-        log.info("Wypożyczanie samochodu {} dla klienta {}", samochodId, klientId);
-
         validateRentalData(klientId, samochodId, dataWypozyczenia, planowanaDataZwrotu);
 
         Klient klient = klientService.findById(klientId)
@@ -80,17 +74,11 @@ public class WypozyczenieService {
 
         samochodService.markAsRented(samochodId);
 
-        log.info("Wypożyczono samochód {} {} dla klienta {} {} na {} dni za {} zł",
-                samochod.getMarka(), samochod.getModel(),
-                klient.getImie(), klient.getNazwisko(),
-                liczbaDni, kosztCalkowity);
-
         return saved;
     }
 
     @Transactional
     public Wypozyczenie returnCar(Long wypozyczenieId, LocalDate dataZwrotu) {
-        log.info("Zwracanie samochodu dla wypożyczenia o ID: {}", wypozyczenieId);
 
         if (dataZwrotu == null) {
             throw new IllegalArgumentException("Data zwrotu jest wymagana");
@@ -113,25 +101,17 @@ public class WypozyczenieService {
         LocalDate planowanaDataZwrotu = wypozyczenie.getDataZwrotu();
         if (planowanaDataZwrotu != null && dataZwrotu.isAfter(planowanaDataZwrotu)) {
             int dniPrzeterminowania = Period.between(planowanaDataZwrotu, dataZwrotu).getDays();
-            log.warn("Samochód zwrócony {} dni po planowanym terminie", dniPrzeterminowania);
         }
 
         Wypozyczenie updated = wypozyczenieRepository.save(wypozyczenie);
 
         samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
 
-        log.info("Zwrócono samochód {} {} od klienta {} {}. Końcowy koszt: {} zł",
-                wypozyczenie.getSamochod().getMarka(), wypozyczenie.getSamochod().getModel(),
-                wypozyczenie.getKlient().getImie(), wypozyczenie.getKlient().getNazwisko(),
-                updated.getKosztCalkowity());
-
         return updated;
     }
 
     @Transactional
     public Wypozyczenie cancelRental(Long wypozyczenieId, String powod) {
-        log.info("Anulowanie wypożyczenia o ID: {} z powodem: {}", wypozyczenieId, powod);
-
         Wypozyczenie wypozyczenie = wypozyczenieRepository.findById(wypozyczenieId)
                 .orElseThrow(() -> new IllegalArgumentException("Wypożyczenie o ID " + wypozyczenieId + " nie istnieje"));
 
@@ -148,27 +128,20 @@ public class WypozyczenieService {
 
         samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
 
-        log.info("Anulowano wypożyczenie samochodu {} {} dla klienta {} {}",
-                wypozyczenie.getSamochod().getMarka(), wypozyczenie.getSamochod().getModel(),
-                wypozyczenie.getKlient().getImie(), wypozyczenie.getKlient().getNazwisko());
-
         return updated;
     }
 
     // ===== OPERACJE BIZNESOWE =====
 
     public List<Wypozyczenie> findByKlient(Long klientId) {
-        log.debug("Pobieranie wypożyczeń klienta: {}", klientId);
         return wypozyczenieRepository.findByKlientIdOrderByDataWypozyczeniaDesc(klientId);
     }
 
     public List<Wypozyczenie> findBySamochod(Long samochodId) {
-        log.debug("Pobieranie wypożyczeń samochodu: {}", samochodId);
         return wypozyczenieRepository.findBySamochodIdOrderByDataWypozyczeniaDesc(samochodId);
     }
 
     public List<Wypozyczenie> findByStatus(StatusWypozyczenia status) {
-        log.debug("Pobieranie wypożyczeń ze statusem: {}", status);
         return wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(status);
     }
 
@@ -187,16 +160,11 @@ public class WypozyczenieService {
 
     @Transactional
     public void markOverdueRentals() {
-        log.info("Oznaczanie przeterminowanych wypożyczeń");
-
         List<Wypozyczenie> overdue = findOverdueRentals();
         for (Wypozyczenie wypozyczenie : overdue) {
             wypozyczenie.setStatus(StatusWypozyczenia.PRZETERMINOWANE);
             wypozyczenieRepository.save(wypozyczenie);
-            log.warn("Oznaczono jako przeterminowane: wypożyczenie ID {}", wypozyczenie.getId());
         }
-
-        log.info("Oznaczono {} przeterminowanych wypożyczeń", overdue.size());
     }
 
     public BigDecimal calculateTotalRevenue() {

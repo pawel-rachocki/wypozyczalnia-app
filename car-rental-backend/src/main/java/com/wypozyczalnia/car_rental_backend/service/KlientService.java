@@ -2,7 +2,6 @@ package com.wypozyczalnia.car_rental_backend.service;
 import com.wypozyczalnia.car_rental_backend.entity.Klient;
 import com.wypozyczalnia.car_rental_backend.repository.KlientRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +11,6 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class KlientService {
 
@@ -25,25 +23,19 @@ public class KlientService {
     // ===== OPERACJE CRUD =====
 
     public List<Klient> findAll() {
-        log.debug("Pobieranie wszystkich klientów");
         return klientRepository.findAll();
     }
 
     public Optional<Klient> findById(Long id) {
-        log.debug("Pobieranie klienta o ID: {}", id);
         return klientRepository.findById(id);
     }
 
     public Optional<Klient> findByEmail(String email) {
-        log.debug("Pobieranie klienta po emailu: {}", email);
         return klientRepository.findByEmail(email);
     }
 
     @Transactional
     public Klient save(Klient klient) {
-        log.info("Zapisywanie nowego klienta: {} {}, email: {}",
-                klient.getImie(), klient.getNazwisko(), klient.getEmail());
-
         validateKlient(klient);
 
         if (klientRepository.existsByEmail(klient.getEmail())) {
@@ -56,13 +48,12 @@ public class KlientService {
         klient.setEmail(klient.getEmail().toLowerCase().trim());
 
         Klient saved = klientRepository.save(klient);
-        log.info("Zapisano klienta z ID: {}", saved.getId());
+
         return saved;
     }
 
     @Transactional
     public Klient update(Long id, Klient klientUpdate) {
-        log.info("Aktualizacja klienta o ID: {}", id);
 
         Klient existing = klientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Klient o ID " + id + " nie istnieje"));
@@ -81,13 +72,12 @@ public class KlientService {
         existing.setEmail(klientUpdate.getEmail().toLowerCase().trim());
 
         Klient updated = klientRepository.save(existing);
-        log.info("Zaktualizowano klienta: {} {}", updated.getImie(), updated.getNazwisko());
+
         return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-        log.info("Usuwanie klienta o ID: {}", id);
 
         Klient klient = klientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Klient o ID " + id + " nie istnieje"));
@@ -97,38 +87,31 @@ public class KlientService {
         }
 
         klientRepository.deleteById(id);
-        log.info("Usunięto klienta: {} {}", klient.getImie(), klient.getNazwisko());
     }
 
     // ===== OPERACJE BIZNESOWE =====
 
     public List<Klient> search(String searchTerm) {
-        log.debug("Wyszukiwanie klientów po frazie: {}", searchTerm);
         return klientRepository.findByImieOrNazwiskoContainingIgnoreCase(searchTerm);
     }
 
     public List<Klient> findByImie(String imie) {
-        log.debug("Pobieranie klientów o imieniu: {}", imie);
         return klientRepository.findByImieIgnoreCaseOrderByNazwiskoAsc(imie);
     }
 
     public List<Klient> findByNazwisko(String nazwisko) {
-        log.debug("Pobieranie klientów o nazwisku: {}", nazwisko);
         return klientRepository.findByNazwiskoIgnoreCaseOrderByImieAsc(nazwisko);
     }
 
     public List<Klient> findKlientsWithActiveRentals() {
-        log.debug("Pobieranie klientów z aktywnymi wypożyczeniami");
         return klientRepository.findKlientsWithActiveRentals();
     }
 
     public List<Klient> findKlientsWithoutRentals() {
-        log.debug("Pobieranie klientów bez wypożyczeń");
         return klientRepository.findKlientsWithoutRentals();
     }
 
     public boolean canRentCar(Long klientId) {
-        log.debug("Sprawdzanie czy klient {} może wypożyczyć samochód", klientId);
 
         if (!klientRepository.existsById(klientId)) {
             return false;
@@ -146,7 +129,6 @@ public class KlientService {
     }
 
     public List<Klient> findMostActiveKlients() {
-        log.debug("Pobieranie najaktywniejszych klientów");
         return klientRepository.findMostActiveKlients();
     }
 
@@ -155,14 +137,13 @@ public class KlientService {
     }
 
     public List<Klient> findByEmailDomain(String domain) {
-        log.debug("Pobieranie klientów z domeną: {}", domain);
         return klientRepository.findByEmailContainingIgnoreCaseOrderByEmailAsc("@" + domain);
     }
 
     // ===== METODY WALIDACJI + POMOCNICZE =====
 
     private void validateKlient(Klient klient) {
-        // Walidacja imienia
+
         if (klient.getImie() == null || klient.getImie().trim().isEmpty()) {
             throw new IllegalArgumentException("Imię jest wymagane");
         }
