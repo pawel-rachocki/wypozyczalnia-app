@@ -1,0 +1,99 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">
+            {{ isEditMode ? 'Edytuj samochód' : 'Dodaj nowy samochód' }}
+          </h3>
+        </div>
+        <div class="card-body">
+          <!-- Loading spinner -->
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Ładowanie...</span>
+            </div>
+          </div>
+
+          <!-- Error message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+
+          <!-- Form -->
+          <form [formGroup]="samochodForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+            <div class="mb-3">
+              <label for="marka" class="form-label">Marka *</label>
+              <input
+                type="text"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('marka')"
+                id="marka"
+                formControlName="marka"
+                placeholder="np. Toyota">
+              <div class="invalid-feedback">
+                {{ getFieldError('marka') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="model" class="form-label">Model *</label>
+              <input
+                type="text"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('model')"
+                id="model"
+                formControlName="model"
+                placeholder="np. Corolla">
+              <div class="invalid-feedback">
+                {{ getFieldError('model') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="cenaZaDzien" class="form-label">Cena za dzień (PLN) *</label>
+              <input
+                type="number"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('cenaZaDzien')"
+                id="cenaZaDzien"
+                formControlName="cenaZaDzien"
+                placeholder="150.00"
+                step="0.01"
+                min="0.01"
+                max="10000">
+              <div class="invalid-feedback">
+                {{ getFieldError('cenaZaDzien') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="status" class="form-label">Status *</label>
+              <select
+                class="form-select"
+                [class.is-invalid]="isFieldInvalid('status')"
+                id="status"
+                formControlName="status">
+                <option value="DOSTEPNY">Dostępny</option>
+                <option value="WYPOZYCZONY">Wypożyczony</option>
+              </select>
+              <div class="invalid-feedback">
+                {{ getFieldError('status') }}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
+                Anuluj
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="loading || samochodForm.invalid">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                {{ isEditMode ? 'Aktualizuj' : 'Dodaj' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
