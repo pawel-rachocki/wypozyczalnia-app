@@ -3,6 +3,7 @@ import { SamochodListComponent } from './components/samochody/samochod-list/samo
 import { SamochodFormComponent } from './components/samochody/samochod-form/samochod-form.component';
 import { KlientListComponent } from './components/klienci/klient-list/klient-list.component';
 import { KlientFormComponent } from './components/klienci/klient-form/klient-form.component';
+import {WypozyczenieComponent} from './components/wypozyczenia/wypozyczenia.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/samochody', pathMatch: 'full' },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'samochody/edit/:id', component: SamochodFormComponent },
   { path: 'klienci', component: KlientListComponent },
   { path: 'klienci/new', component: KlientFormComponent },
-  { path: 'klienci/edit/:id', component: KlientFormComponent }
+  { path: 'klienci/edit/:id', component: KlientFormComponent },
+  { path: 'wypozyczenia', component: WypozyczenieComponent }
 ];
