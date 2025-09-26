@@ -1,12 +1,29 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { SamochodService } from './services/samochod.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'car-rental-frontend';
+
+  constructor(private samochodService: SamochodService) {}
+
+  ngOnInit() {
+    // Test
+    this.samochodService.getAllSamochody().subscribe({
+      next: (samochody) => {
+        console.log('Połączenie z API działa:', samochody);
+      },
+      error: (error) => {
+        console.error('Błąd połączenia z API:', error);
+      }
+    });
+  }
 }
