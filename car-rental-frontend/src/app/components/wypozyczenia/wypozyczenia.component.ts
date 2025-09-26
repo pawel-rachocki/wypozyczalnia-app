@@ -8,6 +8,7 @@ import { WypozyczenieService } from '../../services/wypozyczenie.service';
 import { SamochodService } from '../../services/samochod.service';
 import { KlientService } from '../../services/klient.service';
 import { forkJoin } from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-wypozyczenia',
@@ -46,13 +47,16 @@ export class WypozyczenieComponent implements OnInit {
     private fb: FormBuilder,
     private wypozyczenieService: WypozyczenieService,
     private samochodService: SamochodService,
-    private klientService: KlientService
+    private klientService: KlientService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.wypozyczenieForm = this.createForm();
   }
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.checkForPreselectedCar();
   }
 
   // ===== INITIALIZATION =====
@@ -66,10 +70,10 @@ export class WypozyczenieComponent implements OnInit {
     });
   }
 
-  // ===== UTILITY METHODS ===== (make public for template)
+  // ===== UTILITY METHODS =====
 
   getCurrentDate(): string {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toLocaleDateString('en-CA');
   }
 
   private loadInitialData(): void {
@@ -173,12 +177,10 @@ export class WypozyczenieComponent implements OnInit {
   get filteredWypozyczenia(): Wypozyczenie[] {
     let filtered = this.wypozyczenia;
 
-    // Apply status filter
     if (this.filterStatus) {
       filtered = filtered.filter(w => w.status === this.filterStatus);
     }
 
-    // Apply client filter
     if (this.filterKlient) {
       const searchTerm = this.filterKlient.toLowerCase();
       filtered = filtered.filter(w =>
@@ -188,7 +190,6 @@ export class WypozyczenieComponent implements OnInit {
       );
     }
 
-    // Apply sorting
     return this.sortWypozyczenia(filtered);
   }
 
@@ -367,5 +368,28 @@ export class WypozyczenieComponent implements OnInit {
   shouldShowValidationSummary(): boolean {
     return this.wypozyczenieForm.invalid &&
       ((this.wypozyczenieForm as any).dirty || (this.wypozyczenieForm as any).touched);
+  }
+
+  private checkForPreselectedCar(): void {
+    const samochodId = this.route.snapshot.paramMap.get('samochodId');
+    if (samochodId) {
+      this.setActiveTab('new');
+
+      if (this.dostepneSamochody.length > 0) {
+        this.preselectCar(samochodId);
+      } else {
+        setTimeout(() => this.preselectCar(samochodId), 500);
+      }
+    }
+  }
+
+  private preselectCar(samochodId: string): void {
+    const carExists = this.dostepneSamochody.find(s => s.id === +samochodId);
+    if (carExists) {
+      this.wypozyczenieForm.patchValue({
+        samochodId: +samochodId
+      });
+      this.success = `Wybrany samochód: ${carExists.marka} ${carExists.model}`;
+    }
   }
 }

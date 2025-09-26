@@ -53,6 +53,12 @@
                        title="Edytuj">
                       <i class="fas fa-edit"></i>
                     </a>
+                    <a [routerLink]="['/wypozyczenia/new', samochod.id]"
+                       class="btn btn-outline-success"
+                       [class.disabled]="samochod.status === 'WYPOZYCZONY'"
+                       title="Wypożycz">
+                      <i class="fas fa-handshake"></i>
+                    </a>
                     <button (click)="deleteSamochod(samochod.id!)"
                             class="btn btn-outline-danger"
                             [disabled]="samochod.status === 'WYPOZYCZONY'"
