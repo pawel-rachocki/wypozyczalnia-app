@@ -1,0 +1,101 @@
+/* ===== FOOTER STYLING ===== */
+.footer {
+  margin-top: auto;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-top: 3px solid #3498db;
+}
+
+/* Contact Links */
+.contact-links a {
+  transition: all 0.3s ease;
+}
+
+.contact-links a:hover {
+  color: #3498db !important;
+  transform: translateX(5px);
+}
+
+/* Link Hover Effects */
+.link-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.link-hover:hover {
+  color: #3498db !important;
+  text-decoration: underline !important;
+}
+
+/* Social Links */
+.social-links .btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.social-links .btn:hover {
+  background-color: #3498db;
+  border-color: #3498db;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+/* Icons */
+.text-primary {
+  color: #3498db !important;
+}
+
+/* Quick Links */
+.footer ul li a {
+  transition: all 0.3s ease;
+  padding: 2px 0;
+  display: inline-block;
+}
+
+.footer ul li a:hover {
+  padding-left: 10px;
+}
+
+/* Typography */
+.footer h5 {
+  font-weight: 600;
+  color: #ecf0f1;
+  margin-bottom: 1rem;
+}
+
+.footer p {
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer {
+    text-align: center;
+  }
+
+  .footer .col-md-6 {
+    text-align: center !important;
+    margin-bottom: 1rem;
+  }
+
+  .social-links {
+    margin-top: 1rem;
+  }
+
+  .contact-links a:hover {
+    transform: none;
+  }
+
+  .footer ul li a:hover {
+    padding-left: 0;
+  }
+}
+
+/* Fix footer position */
+.footer {
+  position: relative;
+}
