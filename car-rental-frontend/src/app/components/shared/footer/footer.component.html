@@ -1,0 +1,104 @@
+<footer class="footer bg-dark text-light py-4 mt-5">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Project Info -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5 class="mb-3">
+          <i class="fas fa-car me-2 text-primary"></i>
+          Wypożyczalnia Samochodów
+        </h5>
+        <p class="text-light">
+          Aplikacja webowa Wypożyczalnia Samochodów.
+          Projekt wykonany w technologii Spring Boot + Angular.
+        </p>
+      </div>
+
+      <!-- Contact & Links -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5 class="mb-3">Kontakt</h5>
+        <div class="contact-links">
+          <div class="mb-2">
+            <i class="fas fa-user me-2 text-primary"></i>
+            <strong>{{ authorName }}</strong>
+          </div>
+          <div class="mb-2">
+            <i class="fas fa-envelope me-2 text-primary"></i>
+            <a href="mailto:{{ authorEmail }}" class="text-light text-decoration-none">
+              {{ authorEmail }}
+            </a>
+          </div>
+          <div class="mb-2">
+            <i class="fab fa-github me-2 text-primary"></i>
+            <a (click)="openLink(githubRepo)" class="text-light text-decoration-none link-hover">
+              Repozytorium GitHub
+            </a>
+          </div>
+          <div class="mb-2">
+            <i class="fab fa-youtube me-2 text-primary"></i>
+            <a (click)="openLink(youtubeVideo)" class="text-light text-decoration-none link-hover">
+              Prezentacja na YouTube
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-lg-4 col-md-12 mb-4">
+        <h5 class="mb-3">Szybkie linki</h5>
+        <div class="row">
+          <div class="col-6">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a routerLink="/samochody" class="text-light text-decoration-none link-hover">
+                  <i class="fas fa-car me-2"></i>Samochody
+                </a>
+              </li>
+              <li class="mb-2">
+                <a routerLink="/klienci" class="text-light text-decoration-none link-hover">
+                  <i class="fas fa-users me-2"></i>Klienci
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-6">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a routerLink="/wypozyczenia" class="text-light text-decoration-none link-hover">
+                  <i class="fas fa-handshake me-2"></i>Wypożyczenia
+                </a>
+              </li>
+              <li class="mb-2">
+                <a routerLink="/samochody/new" class="text-light text-decoration-none link-hover">
+                  <i class="fas fa-plus me-2"></i>Dodaj samochód
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <hr class="border-secondary my-4">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <p class="mb-0 text-light">
+          &copy; {{ currentYear }} {{ authorName }}. Projekt na zadanie rekrutacyjne.
+        </p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <div class="social-links">
+          <button (click)="openLink(githubRepo)" class="btn btn-outline-light btn-sm me-2" title="GitHub">
+            <i class="fab fa-github"></i>
+          </button>
+          <button (click)="openLink(youtubeVideo)" class="btn btn-outline-light btn-sm me-2" title="YouTube">
+            <i class="fab fa-youtube"></i>
+          </button>
+          <button (click)="openLink('mailto:' + authorEmail)" class="btn btn-outline-light btn-sm" title="Email">
+            <i class="fas fa-envelope"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

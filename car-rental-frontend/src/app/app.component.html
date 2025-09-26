@@ -1,67 +1,71 @@
-<!-- Navigation Header -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-  <div class="container-fluid">
-    <!-- Brand -->
-    <a class="navbar-brand fw-bold" routerLink="/samochody">
-      <i class="fas fa-car me-2"></i>
-      Wypożyczalnia Samochodów
-    </a>
+<div class="app-container">
+  <!-- Navigation Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" routerLink="/samochody">
+        <i class="fas fa-car me-2"></i>
+        Wypożyczalnia Samochodów
+      </a>
 
-    <!-- Mobile menu toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <!-- Mobile menu toggle -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <!-- Navigation Links -->
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/samochody" routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: false}">
-            <i class="fas fa-car me-1"></i>
-            Samochody
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/klienci" routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: false}">
-            <i class="fas fa-users me-1"></i>
-            Klienci
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/wypozyczenia" routerLinkActive="active">
-            <i class="fas fa-handshake me-1"></i>
-            Wypożyczenia
-          </a>
-        </li>
-      </ul>
+      <!-- Navigation Links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/samochody" routerLinkActive="active"
+               [routerLinkActiveOptions]="{exact: false}">
+              <i class="fas fa-car me-1"></i>
+              Samochody
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/klienci" routerLinkActive="active"
+               [routerLinkActiveOptions]="{exact: false}">
+              <i class="fas fa-users me-1"></i>
+              Klienci
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/wypozyczenia" routerLinkActive="active">
+              <i class="fas fa-handshake me-1"></i>
+              Wypożyczenia
+            </a>
+          </li>
+        </ul>
 
-      <!-- Quick Actions -->
-      <div class="navbar-nav">
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm" href="#" role="button"
-             data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-plus me-1"></i>
-            Szybkie akcje
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" routerLink="/samochody/new">
-              <i class="fas fa-car me-2"></i>Dodaj samochód</a></li>
-            <li><a class="dropdown-item" routerLink="/klienci/new">
-              <i class="fas fa-user-plus me-2"></i>Dodaj klienta</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" routerLink="/wypozyczenia">
-              <i class="fas fa-handshake me-2"></i>Nowe wypożyczenie</a></li>
-          </ul>
+        <!-- Quick Actions -->
+        <div class="navbar-nav">
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm" href="#" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-plus me-1"></i>
+              Szybkie akcje
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" routerLink="/samochody/new">
+                <i class="fas fa-car me-2"></i>Dodaj samochód</a></li>
+              <li><a class="dropdown-item" routerLink="/klienci/new">
+                <i class="fas fa-user-plus me-2"></i>Dodaj klienta</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" routerLink="/wypozyczenia">
+                <i class="fas fa-handshake me-2"></i>Wypożyczenia</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<!-- Page Content -->
-<main class="main-content">
-  <router-outlet></router-outlet>
-</main>
+  <!-- Page Content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

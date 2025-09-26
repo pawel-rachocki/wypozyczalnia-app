@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { SamochodService } from './services/samochod.service';
+import {FooterComponent} from './components/shared/footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,8 @@ import { SamochodService } from './services/samochod.service';
     CommonModule,
     RouterOutlet,
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
+    FooterComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -21,7 +23,6 @@ export class AppComponent implements OnInit {
   constructor(private samochodService: SamochodService) {}
 
   ngOnInit() {
-    // Test
     this.samochodService.getAllSamochody().subscribe({
       next: (samochody) => {
         console.log('Połączenie z API działa:', samochody);

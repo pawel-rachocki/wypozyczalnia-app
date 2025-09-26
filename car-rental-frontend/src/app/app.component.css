@@ -1,3 +1,16 @@
+/* ===== APP LAYOUT ===== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  background-color: #f8f9fa;
+  padding-top: 2rem;
+}
+
 /* ===== NAVBAR STYLING ===== */
 .navbar-brand {
   font-size: 1.4rem;
@@ -36,13 +49,6 @@
 .dropdown-item:hover {
   background-color: #f8f9fa;
   transform: translateX(5px);
-}
-
-/* ===== MAIN CONTENT ===== */
-.main-content {
-  min-height: calc(100vh - 76px); /* Adjust based on navbar height */
-  background-color: #f8f9fa;
-  padding-top: 2rem;
 }
 
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
