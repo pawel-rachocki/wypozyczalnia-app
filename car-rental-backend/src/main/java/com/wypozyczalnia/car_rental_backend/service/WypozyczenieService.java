@@ -77,6 +77,14 @@ public class WypozyczenieService {
         return saved;
     }
 
+    public List<Wypozyczenie> findByStatus(StatusWypozyczenia status) {
+        return wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(status);
+    }
+
+    public List<Wypozyczenie> findActiveRentals() {
+        return findByStatus(StatusWypozyczenia.AKTYWNE);
+    }
+
     @Transactional
     public Wypozyczenie returnCar(Long wypozyczenieId, LocalDate dataZwrotu) {
 
@@ -108,77 +116,6 @@ public class WypozyczenieService {
         samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
 
         return updated;
-    }
-
-    @Transactional
-    public Wypozyczenie cancelRental(Long wypozyczenieId, String powod) {
-        Wypozyczenie wypozyczenie = wypozyczenieRepository.findById(wypozyczenieId)
-                .orElseThrow(() -> new IllegalArgumentException("Wypożyczenie o ID " + wypozyczenieId + " nie istnieje"));
-
-        if (!StatusWypozyczenia.AKTYWNE.equals(wypozyczenie.getStatus())) {
-            throw new IllegalStateException("Można anulować tylko aktywne wypożyczenia");
-        }
-
-        if (LocalDate.now().isAfter(wypozyczenie.getDataWypozyczenia())) {
-            throw new IllegalStateException("Nie można anulować rozpoczętego wypożyczenia");
-        }
-
-        wypozyczenie.setStatus(StatusWypozyczenia.ANULOWANE);
-        Wypozyczenie updated = wypozyczenieRepository.save(wypozyczenie);
-
-        samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
-
-        return updated;
-    }
-
-    // ===== OPERACJE BIZNESOWE =====
-
-    public List<Wypozyczenie> findByKlient(Long klientId) {
-        return wypozyczenieRepository.findByKlientIdOrderByDataWypozyczeniaDesc(klientId);
-    }
-
-    public List<Wypozyczenie> findBySamochod(Long samochodId) {
-        return wypozyczenieRepository.findBySamochodIdOrderByDataWypozyczeniaDesc(samochodId);
-    }
-
-    public List<Wypozyczenie> findByStatus(StatusWypozyczenia status) {
-        return wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(status);
-    }
-
-    public List<Wypozyczenie> findActiveRentals() {
-        return findByStatus(StatusWypozyczenia.AKTYWNE);
-    }
-
-    public List<Wypozyczenie> findOverdueRentals() {
-        LocalDate limitDate = LocalDate.now().minusDays(1);
-        return wypozyczenieRepository.findOverdueRentals(limitDate);
-    }
-
-    public List<Wypozyczenie> findRentalsEndingToday() {
-        return wypozyczenieRepository.findRentalsEndingToday(LocalDate.now());
-    }
-
-    @Transactional
-    public void markOverdueRentals() {
-        List<Wypozyczenie> overdue = findOverdueRentals();
-        for (Wypozyczenie wypozyczenie : overdue) {
-            wypozyczenie.setStatus(StatusWypozyczenia.PRZETERMINOWANE);
-            wypozyczenieRepository.save(wypozyczenie);
-        }
-    }
-
-    public BigDecimal calculateTotalRevenue() {
-        BigDecimal revenue = wypozyczenieRepository.calculateTotalRevenue();
-        return revenue != null ? revenue : BigDecimal.ZERO;
-    }
-
-    public BigDecimal calculateRevenueInPeriod(LocalDate startDate, LocalDate endDate) {
-        BigDecimal revenue = wypozyczenieRepository.calculateRevenueInPeriod(startDate, endDate);
-        return revenue != null ? revenue : BigDecimal.ZERO;
-    }
-
-    public long countByStatus(StatusWypozyczenia status) {
-        return wypozyczenieRepository.countByStatus(status);
     }
 
     // ===== METODY WALIDACJI DANYCH =====
