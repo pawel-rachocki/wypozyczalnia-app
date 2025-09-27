@@ -29,6 +29,11 @@ public class WypozyczenieController {
         List<Wypozyczenie> wypozyczenia = wypozyczenieService.findAll();
         return ResponseEntity.ok(wypozyczenia);
     }
+    @GetMapping("/aktywne")
+    public ResponseEntity<List<Wypozyczenie>> getActiveRentals() {
+        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findActiveRentals();
+        return ResponseEntity.ok(wypozyczenia);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Wypozyczenie> getWypozyczenieById(@PathVariable Long id) {
@@ -65,47 +70,5 @@ public class WypozyczenieController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
-    }
-
-    // ===== WYSZUKIWANIE =====
-
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Wypozyczenie>> getWypozyczenieByStatus(@PathVariable StatusWypozyczenia status) {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findByStatus(status);
-        return ResponseEntity.ok(wypozyczenia);
-    }
-
-    @GetMapping("/klient/{klientId}")
-    public ResponseEntity<List<Wypozyczenie>> getWypozyczenieByKlient(@PathVariable Long klientId) {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findByKlient(klientId);
-        return ResponseEntity.ok(wypozyczenia);
-    }
-
-    @GetMapping("/samochod/{samochodId}")
-    public ResponseEntity<List<Wypozyczenie>> getWypozyczenieBySamochod(@PathVariable Long samochodId) {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findBySamochod(samochodId);
-        return ResponseEntity.ok(wypozyczenia);
-    }
-
-    // ===== OPERACJE BIZNESOWE =====
-
-    @GetMapping("/aktywne")
-    public ResponseEntity<List<Wypozyczenie>> getActiveRentals() {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findActiveRentals();
-        return ResponseEntity.ok(wypozyczenia);
-    }
-
-    @GetMapping("/przeterminowane")
-    public ResponseEntity<List<Wypozyczenie>> getOverdueRentals() {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findOverdueRentals();
-        return ResponseEntity.ok(wypozyczenia);
-    }
-
-    @GetMapping("/przychod")
-    public ResponseEntity<BigDecimal> getRevenueInPeriod(
-            @RequestParam LocalDate from,
-            @RequestParam LocalDate to) {
-        BigDecimal revenue = wypozyczenieService.calculateRevenueInPeriod(from, to);
-        return ResponseEntity.ok(revenue);
     }
 }

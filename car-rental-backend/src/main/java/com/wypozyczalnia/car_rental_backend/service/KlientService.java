@@ -30,10 +30,6 @@ public class KlientService {
         return klientRepository.findById(id);
     }
 
-    public Optional<Klient> findByEmail(String email) {
-        return klientRepository.findByEmail(email);
-    }
-
     @Transactional
     public Klient save(Klient klient) {
         validateKlient(klient);
@@ -89,28 +85,6 @@ public class KlientService {
         klientRepository.deleteById(id);
     }
 
-    // ===== OPERACJE BIZNESOWE =====
-
-    public List<Klient> search(String searchTerm) {
-        return klientRepository.findByImieOrNazwiskoContainingIgnoreCase(searchTerm);
-    }
-
-    public List<Klient> findByImie(String imie) {
-        return klientRepository.findByImieIgnoreCaseOrderByNazwiskoAsc(imie);
-    }
-
-    public List<Klient> findByNazwisko(String nazwisko) {
-        return klientRepository.findByNazwiskoIgnoreCaseOrderByImieAsc(nazwisko);
-    }
-
-    public List<Klient> findKlientsWithActiveRentals() {
-        return klientRepository.findKlientsWithActiveRentals();
-    }
-
-    public List<Klient> findKlientsWithoutRentals() {
-        return klientRepository.findKlientsWithoutRentals();
-    }
-
     public boolean canRentCar(Long klientId) {
 
         if (!klientRepository.existsById(klientId)) {
@@ -118,26 +92,6 @@ public class KlientService {
         }
 
         return true;
-    }
-
-    public boolean hasActiveRentals(Long klientId) {
-        return klientRepository.hasActiveRentals(klientId);
-    }
-
-    public long countRentals(Long klientId) {
-        return klientRepository.countRentalsByKlientId(klientId);
-    }
-
-    public List<Klient> findMostActiveKlients() {
-        return klientRepository.findMostActiveKlients();
-    }
-
-    public boolean emailExists(String email) {
-        return klientRepository.existsByEmail(email);
-    }
-
-    public List<Klient> findByEmailDomain(String domain) {
-        return klientRepository.findByEmailContainingIgnoreCaseOrderByEmailAsc("@" + domain);
     }
 
     // ===== METODY WALIDACJI + POMOCNICZE =====

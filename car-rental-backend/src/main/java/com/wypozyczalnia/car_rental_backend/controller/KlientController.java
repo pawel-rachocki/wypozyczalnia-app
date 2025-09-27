@@ -33,13 +33,6 @@ public class KlientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Klient> getKlientByEmail(@PathVariable String email) {
-        return klientService.findByEmail(email)
-                .map(klient -> ResponseEntity.ok(klient))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
     public ResponseEntity<Klient> createKlient(@Valid @RequestBody Klient klient) {
         try {
@@ -61,7 +54,6 @@ public class KlientController {
         }
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteKlient(@PathVariable Long id) {
         try {
@@ -73,71 +65,4 @@ public class KlientController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
-
-    // ===== OPERACJE WYSZUKIWANIA =====
-
-    @GetMapping("/szukaj")
-    public ResponseEntity<List<Klient>> searchKlienci(@RequestParam(name = "q") String searchTerm) {
-        List<Klient> klienci = klientService.search(searchTerm);
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/imie/{imie}")
-    public ResponseEntity<List<Klient>> getKlienciByImie(@PathVariable String imie) {
-        List<Klient> klienci = klientService.findByImie(imie);
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/nazwisko/{nazwisko}")
-    public ResponseEntity<List<Klient>> getKlienciByNazwisko(@PathVariable String nazwisko) {
-        List<Klient> klienci = klientService.findByNazwisko(nazwisko);
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/domena/{domena}")
-    public ResponseEntity<List<Klient>> getKlienciByEmailDomain(@PathVariable String domena) {
-        List<Klient> klienci = klientService.findByEmailDomain(domena);
-        return ResponseEntity.ok(klienci);
-    }
-
-    // ===== OPERACJE BIZNESOWE =====
-
-    @GetMapping("/aktywni")
-    public ResponseEntity<List<Klient>> getKlienciWithActiveRentals() {
-        List<Klient> klienci = klientService.findKlientsWithActiveRentals();
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/bez-wypozyczen")
-    public ResponseEntity<List<Klient>> getKlienciWithoutRentals() {
-        List<Klient> klienci = klientService.findKlientsWithoutRentals();
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/najaktywniejszi")
-    public ResponseEntity<List<Klient>> getMostActiveKlienci() {
-        List<Klient> klienci = klientService.findMostActiveKlients();
-        return ResponseEntity.ok(klienci);
-    }
-
-    @GetMapping("/{id}/aktywne-wypozyczenia")
-    public ResponseEntity<Boolean> hasActiveRentals(@PathVariable Long id) {
-        boolean hasActive = klientService.hasActiveRentals(id);
-        return ResponseEntity.ok(hasActive);
-    }
-
-    @GetMapping("/{id}/liczba-wypozyczen")
-    public ResponseEntity<Long> countKlientRentals(@PathVariable Long id) {
-        long count = klientService.countRentals(id);
-        return ResponseEntity.ok(count);
-    }
-
-    // ===== WALIDACJA =====
-
-    @GetMapping("/email-exists/{email}")
-    public ResponseEntity<Boolean> checkEmailExists(@PathVariable String email) {
-        boolean exists = klientService.emailExists(email);
-        return ResponseEntity.ok(exists);
-    }
-
 }

@@ -90,23 +90,6 @@ public class SamochodService {
         return samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY);
     }
 
-    public List<Samochod> findByMarka(String marka) {
-        return samochodRepository.findByMarkaIgnoreCaseOrderByModelAsc(marka);
-    }
-
-    public List<Samochod> findByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return samochodRepository.findByCenaZaDzienBetweenOrderByCenaZaDzienAsc(minPrice, maxPrice);
-    }
-
-    public List<Samochod> findAvailableByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return samochodRepository.findByStatusAndCenaZaDzienBetweenOrderByCenaZaDzienAsc(
-                StatusSamochodu.DOSTEPNY, minPrice, maxPrice);
-    }
-
-    public List<Samochod> search(String searchTerm) {
-        return samochodRepository.findByMarkaOrModelContainingIgnoreCase(searchTerm);
-    }
-
     @Transactional
     public void markAsRented(Long id) {
         Samochod samochod = samochodRepository.findById(id)
@@ -133,10 +116,6 @@ public class SamochodService {
         return samochodRepository.findById(id)
                 .map(samochod -> StatusSamochodu.DOSTEPNY.equals(samochod.getStatus()))
                 .orElse(false);
-    }
-
-    public long countByStatus(StatusSamochodu status) {
-        return samochodRepository.countByStatus(status);
     }
 
     // ===== METODA WALIDACJI DANYCH =====
