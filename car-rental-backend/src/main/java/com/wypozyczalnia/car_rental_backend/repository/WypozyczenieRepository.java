@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface WypozyczenieRepository extends JpaRepository<Wypozyczenie, Long> {
-
     boolean existsBySamochodIdAndStatus(Long samochodId, StatusWypozyczenia status);
+    List<Wypozyczenie> findByKlientIdOrderByDataWypozyczeniaDesc(Long klientId);
     List<Wypozyczenie> findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia status);
 }
