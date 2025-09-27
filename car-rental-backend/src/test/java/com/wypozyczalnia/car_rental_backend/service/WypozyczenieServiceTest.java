@@ -176,4 +176,19 @@ class WypozyczenieServiceTest {
         verify(wypozyczenieRepository, times(1))
                 .findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia.AKTYWNE);
     }
+    @Test
+    void shouldCancelRentalWhenReturnBeforeStartDate() {
+        // given
+        LocalDate dataZwrotu = LocalDate.now().minusDays(1);
+        when(wypozyczenieRepository.findById(1L)).thenReturn(Optional.of(testWypozyczenie));
+        when(wypozyczenieRepository.save(any(Wypozyczenie.class))).thenReturn(testWypozyczenie);
+        doNothing().when(samochodService).markAsAvailable(1L);
+
+        // when
+        Wypozyczenie result = wypozyczenieService.returnCar(1L, dataZwrotu);
+
+        // then
+        assertEquals(StatusWypozyczenia.ANULOWANE, testWypozyczenie.getStatus());
+        verify(samochodService, times(1)).markAsAvailable(1L);
+    }
 }

@@ -87,7 +87,6 @@ public class WypozyczenieService {
 
     @Transactional
     public Wypozyczenie returnCar(Long wypozyczenieId, LocalDate dataZwrotu) {
-
         if (dataZwrotu == null) {
             throw new IllegalArgumentException("Data zwrotu jest wymagana");
         }
@@ -100,19 +99,15 @@ public class WypozyczenieService {
         }
 
         if (dataZwrotu.isBefore(wypozyczenie.getDataWypozyczenia())) {
-            throw new IllegalArgumentException("Data zwrotu nie może być wcześniejsza niż data wypożyczenia");
-        }
-
-        wypozyczenie.setDataZwrotu(dataZwrotu);
-        wypozyczenie.setStatus(StatusWypozyczenia.ZAKONCZONE);
-
-        LocalDate planowanaDataZwrotu = wypozyczenie.getDataZwrotu();
-        if (planowanaDataZwrotu != null && dataZwrotu.isAfter(planowanaDataZwrotu)) {
-            int dniPrzeterminowania = Period.between(planowanaDataZwrotu, dataZwrotu).getDays();
+            wypozyczenie.setStatus(StatusWypozyczenia.ANULOWANE);
+            wypozyczenie.setDataZwrotu(dataZwrotu);
+            wypozyczenie.setKosztCalkowity(BigDecimal.ZERO);
+        } else {
+            wypozyczenie.setDataZwrotu(dataZwrotu);
+            wypozyczenie.setStatus(StatusWypozyczenia.ZAKONCZONE);
         }
 
         Wypozyczenie updated = wypozyczenieRepository.save(wypozyczenie);
-
         samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
 
         return updated;
