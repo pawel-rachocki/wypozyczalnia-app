@@ -23,13 +23,5 @@ export class AppComponent implements OnInit {
   constructor(private samochodService: SamochodService) {}
 
   ngOnInit() {
-    this.samochodService.getAllSamochody().subscribe({
-      next: (samochody) => {
-        console.log('Połączenie z API działa:', samochody);
-      },
-      error: (error) => {
-        console.error('Błąd połączenia z API:', error);
-      }
-    });
   }
 }
