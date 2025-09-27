@@ -32,13 +32,6 @@ public class SamochodService {
     public Samochod save(Samochod samochod) {
         validateSamochod(samochod);
 
-        if (samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase(
-                samochod.getMarka(), samochod.getModel())) {
-            throw new IllegalArgumentException(
-                    String.format("Samochód %s %s już istnieje w systemie",
-                            samochod.getMarka(), samochod.getModel()));
-        }
-
         if (samochod.getStatus() == null) {
             samochod.setStatus(StatusSamochodu.DOSTEPNY);
         }
@@ -53,17 +46,6 @@ public class SamochodService {
                 .orElseThrow(() -> new IllegalArgumentException("Samochód o ID " + id + " nie istnieje"));
 
         validateSamochod(samochodUpdate);
-
-        if (!existing.getMarka().equalsIgnoreCase(samochodUpdate.getMarka()) ||
-                !existing.getModel().equalsIgnoreCase(samochodUpdate.getModel())) {
-
-            if (samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase(
-                    samochodUpdate.getMarka(), samochodUpdate.getModel())) {
-                throw new IllegalArgumentException(
-                        String.format("Samochód %s %s już istnieje w systemie",
-                                samochodUpdate.getMarka(), samochodUpdate.getModel()));
-            }
-        }
 
         existing.setMarka(samochodUpdate.getMarka());
         existing.setModel(samochodUpdate.getModel());

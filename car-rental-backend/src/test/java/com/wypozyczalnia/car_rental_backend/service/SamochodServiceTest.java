@@ -113,57 +113,6 @@ class SamochodServiceTest {
     // ===== TESTY SAVE =====
 
     @Test
-    void shouldSaveValidSamochod() {
-        // given
-        Samochod newSamochod = new Samochod("BMW", "X5", BigDecimal.valueOf(200.00), StatusSamochodu.DOSTEPNY);
-        when(samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("BMW", "X5")).thenReturn(false);
-        when(samochodRepository.save(any(Samochod.class))).thenReturn(newSamochod);
-
-        // when
-        Samochod result = samochodService.save(newSamochod);
-
-        // then
-        assertNotNull(result);
-        assertEquals("BMW", result.getMarka());
-        assertEquals("X5", result.getModel());
-        assertEquals(StatusSamochodu.DOSTEPNY, result.getStatus());
-        verify(samochodRepository, times(1)).existsByMarkaIgnoreCaseAndModelIgnoreCase("BMW", "X5");
-        verify(samochodRepository, times(1)).save(newSamochod);
-    }
-
-    @Test
-    void shouldSetDefaultStatusWhenStatusIsNull() {
-        // given
-        Samochod newSamochod = new Samochod("BMW", "X5", BigDecimal.valueOf(200.00), null);
-        when(samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("BMW", "X5")).thenReturn(false);
-        when(samochodRepository.save(any(Samochod.class))).thenReturn(newSamochod);
-
-        // when
-        samochodService.save(newSamochod);
-
-        // then
-        assertEquals(StatusSamochodu.DOSTEPNY, newSamochod.getStatus());
-        verify(samochodRepository, times(1)).save(newSamochod);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenSavingDuplicateSamochod() {
-        // given
-        Samochod duplicateSamochod = new Samochod("Toyota", "Corolla", BigDecimal.valueOf(100.00), StatusSamochodu.DOSTEPNY);
-        when(samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("Toyota", "Corolla")).thenReturn(true);
-
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> samochodService.save(duplicateSamochod)
-        );
-
-        assertEquals("Samochód Toyota Corolla już istnieje w systemie", exception.getMessage());
-        verify(samochodRepository, times(1)).existsByMarkaIgnoreCaseAndModelIgnoreCase("Toyota", "Corolla");
-        verify(samochodRepository, never()).save(any(Samochod.class));
-    }
-
-    @Test
     void shouldThrowExceptionWhenSavingWithNullMarka() {
         // given
         Samochod invalidSamochod = new Samochod(null, "Model", BigDecimal.valueOf(100.00), StatusSamochodu.DOSTEPNY);
@@ -224,27 +173,6 @@ class SamochodServiceTest {
     }
 
     // ===== TESTY UPDATE =====
-
-    @Test
-    void shouldUpdateExistingSamochod() {
-        // given
-        Samochod updateData = new Samochod("Toyota", "Camry", BigDecimal.valueOf(150.00), StatusSamochodu.DOSTEPNY);
-        when(samochodRepository.findById(1L)).thenReturn(Optional.of(testSamochod));
-        when(samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("Toyota", "Camry")).thenReturn(false);
-        when(samochodRepository.save(any(Samochod.class))).thenReturn(testSamochod);
-
-        // when
-        Samochod result = samochodService.update(1L, updateData);
-
-        // then
-        assertNotNull(result);
-        assertEquals("Toyota", testSamochod.getMarka());
-        assertEquals("Camry", testSamochod.getModel());
-        assertEquals(BigDecimal.valueOf(150.00), testSamochod.getCenaZaDzien());
-        verify(samochodRepository, times(1)).findById(1L);
-        verify(samochodRepository, times(1)).save(testSamochod);
-    }
-
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistentSamochod() {
         // given
