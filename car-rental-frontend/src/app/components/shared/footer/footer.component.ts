@@ -16,7 +16,7 @@ export class FooterComponent {
   authorName = 'Paweł Rachocki';
   authorEmail = 'pawel.rachocki@outlook.com';
   githubRepo = 'https://github.com/pawel-rachocki/wypozyczalnia-app';
-  youtubeVideo = 'https://www.youtube.com/watch?v=test';
+  youtubeVideo = 'https://youtu.be/WFHuif5oxVI';
 
   openLink(url: string): void {
     window.open(url, '_blank');

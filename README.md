@@ -207,7 +207,7 @@ mvn test -Dtest=SamochodServiceTest
 
 ## Demo
 
-[Prezentacja działania aplikacji na YouTube](https://www.youtube.com/watch?v=demo_video_id)
+[Prezentacja działania aplikacji na YouTube](https://youtu.be/WFHuif5oxVI)
 
 ## Licencja
 
