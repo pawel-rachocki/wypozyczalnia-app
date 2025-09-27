@@ -201,7 +201,7 @@ mvn test -Dtest=SamochodServiceTest
 
 **Paweł Rachocki**
 - Email: pawel.rachocki@outlook.com
-- GitHub: [github.com/pawel-rachocki/wypozyczalnia-app](https://github.com/pawel-rachocki/wypozyczalnia-app)
+- GitHub: [github.com/pawel-rachocki](https://github.com/pawel-rachocki)
 
 ## Demo
 
