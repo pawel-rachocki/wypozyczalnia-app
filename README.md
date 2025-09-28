@@ -4,7 +4,7 @@ Dwukomponentowa aplikacja webowa do zarządzania wypożyczalnią samochodów, zb
 
 ## Opis projektu
 
-Aplikacja umożliwia kompleksowe zarządzanie flotą samochodów, bazą klientów oraz procesem wypożyczeń. System zawiera funkcjonalności CRUD dla wszystkich głównych encji oraz zaawansowaną logikę biznesową związaną z procesem wypożyczania i zwracania pojazdów.
+Aplikacja umożliwia zarządzanie flotą samochodów, bazą klientów oraz procesem wypożyczeń. System zawiera funkcjonalności CRUD dla wszystkich głównych encji oraz logikę biznesową związaną z procesem wypożyczania i zwracania pojazdów.
 
 ## Diagram bazy danych
 ![Database ERD](docs/Wypozyczelnia_ERD.png)
