@@ -1,6 +1,6 @@
 # Wypożyczalnia Samochodów
 
-Dwukomponentowa aplikacja webowa do zarządzania wypożyczalnią samochodów, zbudowana w technologii **Spring Boot** (backend) i **Angular** (frontend).
+Dwukomponentowa aplikacja webowa do zarządzania wypożyczalnią samochodów, zbudowana w technologii **Java Spring Boot** (backend) i **Angular** (frontend).
 
 ## Opis projektu
 
@@ -16,8 +16,8 @@ Aplikacja umożliwia kompleksowe zarządzanie flotą samochodów, bazą klientó
 - **Spring Data JPA**
 - **PostgreSQL 17**
 - **Maven**
-- **JUnit** (testy jednostkowe)
-- **Mockito** (mocki w testach)
+- **JUnit**
+- **Mockito**
 
 ### Frontend
 - **Angular 19**
@@ -92,24 +92,7 @@ docker-compose up -d postgres-db
 docker ps
 ```
 
-3. **Skonfiguruj połączenie w application.properties**
-```properties
-spring.application.name=car-rental-backend
-
-# DB
-spring.datasource.url=jdbc:postgresql://localhost:5432/car_rental
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.format_sql=true
-```
-
-4. **Uruchom aplikację**
+3. **Uruchom aplikację**
 ```bash
 cd car-rental-backend
 mvn spring-boot:run
@@ -180,20 +163,20 @@ mvn test -Dtest=SamochodServiceTest
 ## Architektura
 
 ### Backend - Clean Architecture
-- **Controller Layer**: Obsługa HTTP requests
+- **Controller Layer**: Obsługa żądań HTTP
 - **Service Layer**: Logika biznesowa i walidacja
 - **Repository Layer**: Dostęp do danych
 - **Entity Layer**: Modele domenowe
 
 ### Frontend - Component Architecture
-- **Standalone Components**: Angular 19 approach
+- **Standalone Components**: Angular 19
 - **Reactive Forms**: Walidacja po stronie klienta
 - **Services**: HTTP komunikacja z backend
 - **Shared Components**: Footer, nawigacja
 
 ## Funkcje UI/UX
 
-- **Responsive Design**: Działa na desktop i mobile
+- **Responsive Design**: Działa na desktop i urządzeniach mobilnych
 - **Intuicyjna nawigacja**: Navbar z dropdown menu
 - **Real-time feedback**: Komunikaty sukcesu/błędu
 - **Filtrowanie i sortowanie**: W tabelach wypożyczeń
@@ -211,6 +194,6 @@ mvn test -Dtest=SamochodServiceTest
 
 ## Licencja
 
-Projekt wykonany na zadanie rekrutacyjne. Wszystkie prawa zastrzeżone.
+Projekt wykonany na zadanie rekrutacyjne.
 
 ---
