@@ -1,0 +1,71 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Zarządzanie klientami</h2>
+        <a routerLink="/klienci/new" class="btn btn-primary">
+          Dodaj klienta
+        </a>
+      </div>
+
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="text-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Ładowanie...</span>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+
+      <!-- Klienci list -->
+      <div *ngIf="!loading && !error" class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Email</th>
+                <th>Akcje</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let klient of klienci">
+                <td>{{ klient.id }}</td>
+                <td>{{ klient.firstName }}</td>
+                <td>{{ klient.lastName }}</td>
+                <td>{{ klient.email }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a [routerLink]="['/klienci/edit', klient.id]"
+                       class="btn btn-outline-primary"
+                       title="Edytuj">
+                      Edytuj
+                    </a>
+                    <button (click)="deleteKlient(klient.id!)"
+                            class="btn btn-outline-danger"
+                            title="Usuń">
+                      Usuń
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <!-- Brak danych -->
+            <div *ngIf="klienci.length === 0" class="text-center py-4">
+              <p class="text-muted">Brak klientów w bazie danych</p>
+              <a routerLink="/klienci/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

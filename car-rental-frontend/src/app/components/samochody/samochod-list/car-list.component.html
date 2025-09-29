@@ -1,0 +1,84 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Zarządzanie samochodami</h2>
+        <a routerLink="/samochody/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Dodaj samochód
+        </a>
+      </div>
+
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="text-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Ładowanie...</span>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+
+      <!-- Samochody lista -->
+      <div *ngIf="!loading && !error" class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Cena za dzień</th>
+                <th>Status</th>
+                <th>Akcje</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let samochod of samochody" [class.table-secondary]="samochod.status === 'WYPOZYCZONY'">
+                <td>{{ samochod.id }}</td>
+                <td>{{ samochod.brand }}</td>
+                <td>{{ samochod.model }}</td>
+                <td>{{ samochod.dailyPrice }} zł</td>
+                <td>
+                    <span [class]="getStatusBadgeClass(samochod.status)">
+                      {{ getStatusText(samochod.status) }}
+                    </span>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a [routerLink]="['/samochody/edit', samochod.id]"
+                       class="btn btn-outline-primary"
+                       title="Edytuj">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a [routerLink]="['/wypozyczenia/new', samochod.id]"
+                       class="btn btn-outline-success"
+                       [class.disabled]="samochod.status === 'WYPOZYCZONY'"
+                       title="Wypożycz">
+                      <i class="fas fa-handshake"></i>
+                    </a>
+                    <button (click)="deleteSamochod(samochod.id!)"
+                            class="btn btn-outline-danger"
+                            [disabled]="samochod.status === 'WYPOZYCZONY'"
+                            title="Usuń">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <!-- Brak danych -->
+            <div *ngIf="samochody.length === 0" class="text-center py-4">
+              <p class="text-muted">Brak samochodów w bazie danych</p>
+              <a routerLink="/samochody/new" class="btn btn-primary">Dodaj pierwszy samochód</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
