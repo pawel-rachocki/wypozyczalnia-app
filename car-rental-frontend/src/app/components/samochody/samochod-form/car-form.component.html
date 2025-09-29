@@ -21,7 +21,7 @@
           </div>
 
           <!-- Form -->
-          <form [formGroup]="samochodForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+          <form [formGroup]="carForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
             <div class="mb-3">
               <label for="brand" class="form-label">Marka *</label>
               <input
@@ -86,7 +86,7 @@
               <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
                 Anuluj
               </button>
-              <button type="submit" class="btn btn-primary" [disabled]="loading || samochodForm.invalid">
+              <button type="submit" class="btn btn-primary" [disabled]="loading || carForm.invalid">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
                 {{ isEditMode ? 'Aktualizuj' : 'Dodaj' }}
               </button>

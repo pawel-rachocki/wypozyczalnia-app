@@ -36,7 +36,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let samochod of samochody" [class.table-secondary]="samochod.status === 'WYPOZYCZONY'">
+              <tr *ngFor="let samochod of cars" [class.table-secondary]="samochod.status === 'WYPOZYCZONY'">
                 <td>{{ samochod.id }}</td>
                 <td>{{ samochod.brand }}</td>
                 <td>{{ samochod.model }}</td>
@@ -59,7 +59,7 @@
                        title="Wypożycz">
                       <i class="fas fa-handshake"></i>
                     </a>
-                    <button (click)="deleteSamochod(samochod.id!)"
+                    <button (click)="deleteCar(samochod.id!)"
                             class="btn btn-outline-danger"
                             [disabled]="samochod.status === 'WYPOZYCZONY'"
                             title="Usuń">
@@ -72,7 +72,7 @@
             </table>
 
             <!-- Brak danych -->
-            <div *ngIf="samochody.length === 0" class="text-center py-4">
+            <div *ngIf="cars.length === 0" class="text-center py-4">
               <p class="text-muted">Brak samochodów w bazie danych</p>
               <a routerLink="/samochody/new" class="btn btn-primary">Dodaj pierwszy samochód</a>
             </div>

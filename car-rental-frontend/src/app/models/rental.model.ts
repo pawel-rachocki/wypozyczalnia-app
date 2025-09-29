@@ -1,17 +1,17 @@
-import { Samochod } from './car.model';
-import { Klient } from './client.model';
+import { Car } from './car.model';
+import { Client } from './client.model';
 
-export interface Wypozyczenie {
+export interface Rental {
   id?: number;
-  client: Klient;
-  car: Samochod;
+  client: Client;
+  car: Car;
   rentalDate: string;
   returnDate?: string;
   totalCost: number;
   status: 'AKTYWNE' | 'ZAKONCZONE' | 'PRZETERMINOWANE' | 'ANULOWANE';
 }
 
-export interface WypozyczenieRequest {
+export interface RentalRequest {
   clientId: number;
   carId: number;
   rentalDate: string;

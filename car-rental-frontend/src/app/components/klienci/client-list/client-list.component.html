@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Zarządzanie klientami</h2>
-        <a routerLink="/klienci/new" class="btn btn-primary">
+        <a routerLink="/clients/new" class="btn btn-primary">
           Dodaj klienta
         </a>
       </div>
@@ -35,19 +35,19 @@
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let klient of klienci">
+              <tr *ngFor="let klient of clients">
                 <td>{{ klient.id }}</td>
                 <td>{{ klient.firstName }}</td>
                 <td>{{ klient.lastName }}</td>
                 <td>{{ klient.email }}</td>
                 <td>
                   <div class="btn-group btn-group-sm" role="group">
-                    <a [routerLink]="['/klienci/edit', klient.id]"
+                    <a [routerLink]="['/clients/edit', klient.id]"
                        class="btn btn-outline-primary"
                        title="Edytuj">
                       Edytuj
                     </a>
-                    <button (click)="deleteKlient(klient.id!)"
+                    <button (click)="deleteClient(klient.id!)"
                             class="btn btn-outline-danger"
                             title="Usuń">
                       Usuń
@@ -59,9 +59,9 @@
             </table>
 
             <!-- Brak danych -->
-            <div *ngIf="klienci.length === 0" class="text-center py-4">
+            <div *ngIf="clients.length === 0" class="text-center py-4">
               <p class="text-muted">Brak klientów w bazie danych</p>
-              <a routerLink="/klienci/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
+              <a routerLink="/clients/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
             </div>
           </div>
         </div>

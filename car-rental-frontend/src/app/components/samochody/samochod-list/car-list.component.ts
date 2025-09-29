@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { SamochodService } from '../../../services/car.service';
-import { Samochod } from '../../../models/car.model';
+import { CarService } from '../../../services/car.service';
+import { Car } from '../../../models/car.model';
 
 @Component({
   selector: 'app-samochod-list',
@@ -11,37 +11,37 @@ import { Samochod } from '../../../models/car.model';
   templateUrl: './car-list.component.html',
   styleUrl: './car-list.component.css'
 })
-export class SamochodListComponent implements OnInit {
-  samochody: Samochod[] = [];
+export class CarListComponent implements OnInit {
+  cars: Car[] = [];
   loading = true;
   error = '';
 
-  constructor(private samochodService: SamochodService) { }
+  constructor(private carService: CarService) { }
 
   ngOnInit(): void {
-    this.loadSamochody();
+    this.loadCar();
   }
 
-  loadSamochody(): void {
+  loadCar(): void {
     this.loading = true;
-    this.samochodService.getAllSamochody().subscribe({
+    this.carService.getAllCars().subscribe({
       next: (data) => {
-        this.samochody = data;
+        this.cars = data;
         this.loading = false;
       },
       error: (error) => {
         this.error = 'Błąd podczas ładowania samochodów';
         this.loading = false;
-        console.error('Error loading samochody:', error);
+        console.error('Error loading cars:', error);
       }
     });
   }
 
-  deleteSamochod(id: number): void {
+  deleteCar(id: number): void {
     if (confirm('Czy na pewno chcesz usunąć ten samochód?')) {
-      this.samochodService.deleteSamochod(id).subscribe({
+      this.carService.deleteCar(id).subscribe({
         next: () => {
-          this.loadSamochody();
+          this.loadCar();
         },
         error: (error) => {
           alert('Błąd podczas usuwania samochodu');
