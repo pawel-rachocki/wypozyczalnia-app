@@ -35,7 +35,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let klient of klienci">
+              <tr *ngFor="let klient of clients">
                 <td>{{ klient.id }}</td>
                 <td>{{ klient.firstName }}</td>
                 <td>{{ klient.lastName }}</td>
@@ -47,7 +47,7 @@
                        title="Edytuj">
                       Edytuj
                     </a>
-                    <button (click)="deleteKlient(klient.id!)"
+                    <button (click)="deleteClient(klient.id!)"
                             class="btn btn-outline-danger"
                             title="Usuń">
                       Usuń
@@ -59,7 +59,7 @@
             </table>
 
             <!-- Brak danych -->
-            <div *ngIf="klienci.length === 0" class="text-center py-4">
+            <div *ngIf="clients.length === 0" class="text-center py-4">
               <p class="text-muted">Brak klientów w bazie danych</p>
               <a routerLink="/klienci/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
             </div>

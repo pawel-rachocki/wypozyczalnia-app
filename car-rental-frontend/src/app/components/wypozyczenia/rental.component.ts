@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule, FormsModule, AbstractControl } from '@angular/forms';
-import { Wypozyczenie, WypozyczenieRequest } from '../../models/rental.model';
-import { Samochod } from '../../models/car.model';
-import { Klient } from '../../models/client.model';
-import { WypozyczenieService } from '../../services/rental.service';
-import { SamochodService } from '../../services/car.service';
-import { KlientService } from '../../services/client.service';
+import { Rental, RentalRequest } from '../../models/rental.model';
+import { Car } from '../../models/car.model';
+import { Client } from '../../models/client.model';
+import { RentalService } from '../../services/rental.service';
+import { CarService } from '../../services/car.service';
+import { ClientService } from '../../services/client.service';
 import { forkJoin } from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
-  selector: 'app-wypozyczenia',
+  selector: 'app-rentals',
   standalone: true,
   imports: [
     CommonModule,
@@ -24,12 +24,12 @@ import {ActivatedRoute} from '@angular/router';
 export class WypozyczenieComponent implements OnInit {
 
   // Data properties
-  wypozyczenia: Wypozyczenie[] = [];
-  activeRentals: Wypozyczenie[] = [];
-  dostepneSamochody: Samochod[] = [];
-  klienci: Klient[] = [];
+  rentals: Rental[] = [];
+  activeRentals: Rental[] = [];
+  availableCars: Car[] = [];
+  clients: Client[] = [];
 
-  wypozyczenieForm!: FormGroup;
+  rentalForm!: FormGroup;
   isLoading = false;
   error = '';
   success = '';
@@ -37,18 +37,18 @@ export class WypozyczenieComponent implements OnInit {
   activeTab: 'active' | 'all' | 'new' = 'active';
 
   filterStatus = '';
-  filterKlient = '';
+  filterClient = '';
   sortBy: 'data' | 'klient' | 'samochod' | 'koszt' = 'data';
   sortDirection: 'asc' | 'desc' = 'desc';
 
   constructor(
     private fb: FormBuilder,
-    private wypozyczenieService: WypozyczenieService,
-    private samochodService: SamochodService,
-    private klientService: KlientService,
+    private rentalService: RentalService,
+    private carService: CarService,
+    private clientService: ClientService,
     private route: ActivatedRoute,
   ) {
-    this.wypozyczenieForm = this.createForm();
+    this.rentalForm = this.createForm();
   }
 
   ngOnInit(): void {
@@ -72,16 +72,16 @@ export class WypozyczenieComponent implements OnInit {
     this.isLoading = true;
 
     forkJoin({
-      wypozyczenia: this.wypozyczenieService.getAllRentals(),
-      activeRentals: this.wypozyczenieService.getActiveRentals(),
-      samochody: this.samochodService.getAvailableSamochody(),
-      klienci: this.klientService.getAllKlienci()
+      rentals: this.rentalService.getAllRentals(),
+      activeRentals: this.rentalService.getActiveRentals(),
+      cars: this.carService.getAvailableCars(),
+      clients: this.clientService.getAllClients()
     }).subscribe({
       next: (data) => {
-        this.wypozyczenia = data.wypozyczenia;
+        this.rentals = data.rentals;
         this.activeRentals = data.activeRentals;
-        this.dostepneSamochody = data.samochody;
-        this.klienci = data.klienci;
+        this.availableCars = data.cars;
+        this.clients = data.clients;
         this.isLoading = false;
       },
       error: (error) => {
@@ -92,11 +92,11 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   onSubmitRental(): void {
-    if (this.wypozyczenieForm.valid) {
+    if (this.rentalForm.valid) {
       this.isLoading = true;
       this.clearMessages();
 
-      const request: WypozyczenieRequest = this.wypozyczenieForm.value;
+      const request: RentalRequest = this.rentalForm.value;
 
       if (!this.isValidDateRange(request.rentalDate, request.plannedReturnDate)) {
         this.error = 'Data zwrotu nie może być wcześniejsza niż data wypożyczenia';
@@ -104,7 +104,7 @@ export class WypozyczenieComponent implements OnInit {
         return;
       }
 
-      this.wypozyczenieService.rentCar(request).subscribe({
+      this.rentalService.rentCar(request).subscribe({
         next: (wypozyczenie) => {
           this.success = `Pomyślnie wypożyczono samochód ${wypozyczenie.car.brand} ${wypozyczenie.car.model}`;
           this.resetForm();
@@ -122,13 +122,13 @@ export class WypozyczenieComponent implements OnInit {
     }
   }
 
-  returnCar(wypozyczenie: Wypozyczenie): void {
+  returnCar(wypozyczenie: Rental): void {
     if (!wypozyczenie.id) return;
 
     this.isLoading = true;
     this.clearMessages();
 
-    this.wypozyczenieService.returnCar(wypozyczenie.id).subscribe({
+    this.rentalService.returnCar(wypozyczenie.id).subscribe({
       next: (updatedWypozyczenie) => {
         this.success = `Pomyślnie zwrócono samochód ${updatedWypozyczenie.car.brand} ${updatedWypozyczenie.car.model}`;
         this.refreshData();
@@ -141,14 +141,14 @@ export class WypozyczenieComponent implements OnInit {
 
   private refreshData(): void {
     forkJoin({
-      wypozyczenia: this.wypozyczenieService.getAllRentals(),
-      activeRentals: this.wypozyczenieService.getActiveRentals(),
-      samochody: this.samochodService.getAvailableSamochody()
+      rentals: this.rentalService.getAllRentals(),
+      activeRentals: this.rentalService.getActiveRentals(),
+      cars: this.carService.getAvailableCars()
     }).subscribe({
       next: (data) => {
-        this.wypozyczenia = data.wypozyczenia;
+        this.rentals = data.rentals;
         this.activeRentals = data.activeRentals;
-        this.dostepneSamochody = data.samochody;
+        this.availableCars = data.cars;
         this.isLoading = false;
       },
       error: (error) => {
@@ -158,15 +158,15 @@ export class WypozyczenieComponent implements OnInit {
     });
   }
 
-  get filteredWypozyczenia(): Wypozyczenie[] {
-    let filtered = this.wypozyczenia;
+  get filteredRentals(): Rental[] {
+    let filtered = this.rentals;
 
     if (this.filterStatus) {
       filtered = filtered.filter(w => w.status === this.filterStatus);
     }
 
-    if (this.filterKlient) {
-      const searchTerm = this.filterKlient.toLowerCase();
+    if (this.filterClient) {
+      const searchTerm = this.filterClient.toLowerCase();
       filtered = filtered.filter(w =>
         w.client.firstName.toLowerCase().includes(searchTerm) ||
         w.client.lastName.toLowerCase().includes(searchTerm) ||
@@ -174,11 +174,11 @@ export class WypozyczenieComponent implements OnInit {
       );
     }
 
-    return this.sortWypozyczenia(filtered);
+    return this.sortRentals(filtered);
   }
 
-  private sortWypozyczenia(wypozyczenia: Wypozyczenie[]): Wypozyczenie[] {
-    return wypozyczenia.sort((a, b) => {
+  private sortRentals(rentals: Rental[]): Rental[] {
+    return rentals.sort((a, b) => {
       let comparison = 0;
 
       switch (this.sortBy) {
@@ -210,15 +210,15 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   private resetForm(): void {
-    this.wypozyczenieForm.reset();
-    this.wypozyczenieForm.patchValue({
+    this.rentalForm.reset();
+    this.rentalForm.patchValue({
       rentalDate: this.getCurrentDate()
     });
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.wypozyczenieForm.controls).forEach(key => {
-      const control = this.wypozyczenieForm.get(key);
+    Object.keys(this.rentalForm.controls).forEach(key => {
+      const control = this.rentalForm.get(key);
       if (control) {
         (control as any).markAsTouched();
       }
@@ -243,11 +243,11 @@ export class WypozyczenieComponent implements OnInit {
     this.success = '';
   }
 
-  getKlientFullName(klient: Klient): string {
+  getClientFullName(klient: Client): string {
     return `${klient.firstName} ${klient.lastName}`;
   }
 
-  getSamochodFullName(samochod: Samochod): string {
+  getCarFullName(samochod: Car): string {
     return `${samochod.brand} ${samochod.model}`;
   }
 
@@ -262,12 +262,12 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.wypozyczenieForm.get(fieldName);
+    const field = this.rentalForm.get(fieldName);
     return field ? field.invalid && ((field as any).dirty || (field as any).touched) : false;
   }
 
   getFieldError(fieldName: string): string {
-    const field = this.wypozyczenieForm.get(fieldName);
+    const field = this.rentalForm.get(fieldName);
     if (field && (field as any).errors) {
       if ((field as any).errors['required']) return `${fieldName} jest wymagane`;
     }
@@ -285,32 +285,32 @@ export class WypozyczenieComponent implements OnInit {
     }
   }
 
-  get isKlientValid(): boolean {
-    const field: AbstractControl | null = this.wypozyczenieForm.get('clientId');
+  get isClientValid(): boolean {
+    const field: AbstractControl | null = this.rentalForm.get('clientId');
     return field ? field.valid : false;
   }
 
-  get isSamochodValid(): boolean {
-    const field: AbstractControl | null = this.wypozyczenieForm.get('carId');
+  get isCarValid(): boolean {
+    const field: AbstractControl | null = this.rentalForm.get('carId');
     return field ? field.valid : false;
   }
 
   get isDateValid(): boolean {
-    const rentalDate = this.wypozyczenieForm.get('rentalDate')?.value;
-    const plannedReturnDate = this.wypozyczenieForm.get('plannedReturnDate')?.value;
+    const rentalDate = this.rentalForm.get('rentalDate')?.value;
+    const plannedReturnDate = this.rentalForm.get('plannedReturnDate')?.value;
     return !!(rentalDate && plannedReturnDate && this.isValidDateRange(rentalDate, plannedReturnDate));
   }
 
   get estimatedCost(): number {
-    const carId = this.wypozyczenieForm.get('carId')?.value;
-    const rentalDate = this.wypozyczenieForm.get('rentalDate')?.value;
-    const plannedReturnDate = this.wypozyczenieForm.get('plannedReturnDate')?.value;
+    const carId = this.rentalForm.get('carId')?.value;
+    const rentalDate = this.rentalForm.get('rentalDate')?.value;
+    const plannedReturnDate = this.rentalForm.get('plannedReturnDate')?.value;
 
     if (!carId || !rentalDate || !plannedReturnDate) {
       return 0;
     }
 
-    const samochod = this.dostepneSamochody.find(s => s.id === +carId);
+    const samochod = this.availableCars.find(s => s.id === +carId);
     if (!samochod) return 0;
 
     const startDate = new Date(rentalDate);
@@ -321,8 +321,8 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   getDaysDifference(): number {
-    const rentalDate = this.wypozyczenieForm.get('rentalDate')?.value;
-    const plannedReturnDate = this.wypozyczenieForm.get('plannedReturnDate')?.value;
+    const rentalDate = this.rentalForm.get('rentalDate')?.value;
+    const plannedReturnDate = this.rentalForm.get('plannedReturnDate')?.value;
 
     if (!rentalDate || !plannedReturnDate) return 0;
 
@@ -332,15 +332,15 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   getSelectedCarPrice(): number {
-    const carId = this.wypozyczenieForm.get('carId')?.value;
+    const carId = this.rentalForm.get('carId')?.value;
     if (!carId) return 0;
 
-    const samochod = this.dostepneSamochody.find(s => s.id === +carId);
+    const samochod = this.availableCars.find(s => s.id === +carId);
     return samochod ? samochod.dailyPrice : 0;
   }
   shouldShowValidationSummary(): boolean {
-    return this.wypozyczenieForm.invalid &&
-      ((this.wypozyczenieForm as any).dirty || (this.wypozyczenieForm as any).touched);
+    return this.rentalForm.invalid &&
+      ((this.rentalForm as any).dirty || (this.rentalForm as any).touched);
   }
 
   private checkForPreselectedCar(): void {
@@ -348,7 +348,7 @@ export class WypozyczenieComponent implements OnInit {
     if (carId) {
       this.setActiveTab('new');
 
-      if (this.dostepneSamochody.length > 0) {
+      if (this.availableCars.length > 0) {
         this.preselectCar(carId);
       } else {
         setTimeout(() => this.preselectCar(carId), 500);
@@ -357,9 +357,9 @@ export class WypozyczenieComponent implements OnInit {
   }
 
   private preselectCar(carId: string): void {
-    const carExists = this.dostepneSamochody.find(s => s.id === +carId);
+    const carExists = this.availableCars.find(s => s.id === +carId);
     if (carExists) {
-      this.wypozyczenieForm.patchValue({
+      this.rentalForm.patchValue({
         carId: +carId
       });
       this.success = `Wybrany samochód: ${carExists.brand} ${carExists.model}`;

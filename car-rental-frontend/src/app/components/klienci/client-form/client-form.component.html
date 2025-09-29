@@ -21,7 +21,7 @@
           </div>
 
           <!-- Form -->
-          <form [formGroup]="klientForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+          <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
             <div class="mb-3">
               <label for="imie" class="form-label">Imię *</label>
               <input
@@ -68,7 +68,7 @@
               <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
                 Anuluj
               </button>
-              <button type="submit" class="btn btn-primary" [disabled]="loading || klientForm.invalid">
+              <button type="submit" class="btn btn-primary" [disabled]="loading || clientForm.invalid">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
                 {{ isEditMode ? 'Aktualizuj' : 'Dodaj' }}
               </button>

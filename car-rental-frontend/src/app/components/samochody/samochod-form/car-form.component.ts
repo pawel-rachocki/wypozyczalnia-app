@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { SamochodService } from '../../../services/car.service';
-import { Samochod } from '../../../models/car.model';
+import { CarService } from '../../../services/car.service';
+import { Car } from '../../../models/car.model';
 
 @Component({
   selector: 'app-samochod-form',
@@ -12,20 +12,20 @@ import { Samochod } from '../../../models/car.model';
   templateUrl: './car-form.component.html',
   styleUrl: './car-form.component.css'
 })
-export class SamochodFormComponent implements OnInit {
-  samochodForm: FormGroup;
+export class CarFormComponent implements OnInit {
+  carForm: FormGroup;
   isEditMode = false;
-  samochodId: number | null = null;
+  carId: number | null = null;
   loading = false;
   error = '';
 
   constructor(
     private fb: FormBuilder,
-    private samochodService: SamochodService,
+    private carService: CarService,
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.samochodForm = this.fb.group({
+    this.carForm = this.fb.group({
       brand: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       model: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       dailyPrice: ['', [Validators.required, Validators.min(0.01), Validators.max(10000)]],
@@ -37,16 +37,16 @@ export class SamochodFormComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
-      this.samochodId = +id;
-      this.loadSamochod(this.samochodId);
+      this.carId = +id;
+      this.loadCar(this.carId);
     }
   }
 
-  loadSamochod(id: number): void {
+  loadCar(id: number): void {
     this.loading = true;
-    this.samochodService.getSamochodById(id).subscribe({
+    this.carService.getCarById(id).subscribe({
       next: (samochod) => {
-        this.samochodForm.patchValue(samochod);
+        this.carForm.patchValue(samochod);
         this.loading = false;
       },
       error: (error) => {
@@ -58,13 +58,13 @@ export class SamochodFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.samochodForm.valid) {
+    if (this.carForm.valid) {
       this.loading = true;
-      const samochodData: Samochod = this.samochodForm.value;
+      const samochodData: Car = this.carForm.value;
 
       const operation = this.isEditMode
-        ? this.samochodService.updateSamochod(this.samochodId!, samochodData)
-        : this.samochodService.createSamochod(samochodData);
+        ? this.carService.updateCar(this.carId!, samochodData)
+        : this.carService.createCar(samochodData);
 
       operation.subscribe({
         next: () => {
@@ -86,14 +86,14 @@ export class SamochodFormComponent implements OnInit {
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.samochodForm.controls).forEach(key => {
-      const control = this.samochodForm.get(key);
+    Object.keys(this.carForm.controls).forEach(key => {
+      const control = this.carForm.get(key);
       control?.markAsTouched();
     });
   }
 
   getFieldError(fieldName: string): string {
-    const field = this.samochodForm.get(fieldName);
+    const field = this.carForm.get(fieldName);
     if (field?.errors && (field as any).touched) {
       if (field.errors['required']) return `${fieldName} jest wymagane`;
       if (field.errors['minlength']) return `${fieldName} musi mieć co najmniej ${field.errors['minlength'].requiredLength} znaków`;
@@ -105,7 +105,7 @@ export class SamochodFormComponent implements OnInit {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.samochodForm.get(fieldName);
+    const field = this.carForm.get(fieldName);
     return field ? (field.invalid && (field as any).touched) : false;
   }
 }

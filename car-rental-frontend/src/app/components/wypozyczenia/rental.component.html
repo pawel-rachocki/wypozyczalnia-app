@@ -39,7 +39,7 @@
       class="tab-btn"
       [class.active]="activeTab === 'all'"
       (click)="setActiveTab('all')">
-      <i class="fas fa-list"></i> Wszystkie wypożyczenia ({{ wypozyczenia.length }})
+      <i class="fas fa-list"></i> Wszystkie wypożyczenia ({{ rentals.length }})
     </button>
     <button
       class="tab-btn"
@@ -81,10 +81,10 @@
         <div class="rental-details">
           <div class="detail-row">
             <div class="detail-label">
-              <i class="fas fa-user"></i> Klient:
+              <i class="fas fa-user"></i> Client:
             </div>
             <div class="detail-value">
-              {{ getKlientFullName(wypozyczenie.client) }}
+              {{ getClientFullName(wypozyczenie.client) }}
             </div>
           </div>
 
@@ -93,7 +93,7 @@
               <i class="fas fa-car"></i> Samochód:
             </div>
             <div class="detail-value">
-              {{ getSamochodFullName(wypozyczenie.car) }}
+              {{ getCarFullName(wypozyczenie.car) }}
             </div>
           </div>
 
@@ -147,11 +147,11 @@
         </div>
 
         <div class="filter-group">
-          <label for="klientFilter">Klient:</label>
+          <label for="klientFilter">Client:</label>
           <input
             id="klientFilter"
             type="text"
-            [(ngModel)]="filterKlient"
+            [(ngModel)]="filterClient"
             placeholder="Wyszukaj klienta..."
             class="form-input">
         </div>
@@ -169,7 +169,7 @@
               class="sort-btn"
               [class.active]="sortBy === 'klient'"
               (click)="onSortChange('klient')">
-              Klient {{ sortBy === 'klient' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
+              Client {{ sortBy === 'klient' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
             </button>
             <button
               class="sort-btn"
@@ -183,20 +183,20 @@
     </div>
 
     <!-- Rentals Table -->
-    <div *ngIf="filteredWypozyczenia.length === 0" class="empty-state">
+    <div *ngIf="filteredRentals.length === 0" class="empty-state">
       <i class="fas fa-search fa-3x"></i>
       <h4>Brak wyników</h4>
       <p>Nie znaleziono wypożyczeń spełniających kryteria wyszukiwania.</p>
     </div>
 
-    <div *ngIf="filteredWypozyczenia.length > 0" class="rentals-table-container">
+    <div *ngIf="filteredRentals.length > 0" class="rentals-table-container">
       <table class="rentals-table">
         <thead>
         <tr>
           <th>ID</th>
           <th>Status</th>
           <th (click)="onSortChange('klient')" class="sortable">
-            Klient
+            Client
             <i *ngIf="sortBy === 'klient'"
                class="fas"
                [class.fa-sort-up]="sortDirection === 'asc'"
@@ -228,7 +228,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let wypozyczenie of filteredWypozyczenia">
+        <tr *ngFor="let wypozyczenie of filteredRentals">
           <td>{{ wypozyczenie.id }}</td>
           <td>
               <span class="status-badge" [class]="getStatusClass(wypozyczenie.status)">
@@ -237,11 +237,11 @@
           </td>
           <td>
             <div class="client-info">
-              <strong>{{ getKlientFullName(wypozyczenie.client) }}</strong>
+              <strong>{{ getClientFullName(wypozyczenie.client) }}</strong>
               <small>{{ wypozyczenie.client.email }}</small>
             </div>
           </td>
-          <td>{{ getSamochodFullName(wypozyczenie.car) }}</td>
+          <td>{{ getCarFullName(wypozyczenie.car) }}</td>
           <td>{{ wypozyczenie.rentalDate | date:'dd.MM.yyyy' }}</td>
           <td>
               <span *ngIf="wypozyczenie.returnDate">
@@ -273,19 +273,19 @@
     </div>
 
     <div class="new-rental-form">
-      <form [formGroup]="wypozyczenieForm" (ngSubmit)="onSubmitRental()">
+      <form [formGroup]="rentalForm" (ngSubmit)="onSubmitRental()">
         <div class="form-grid">
           <!-- Client Selection -->
           <div class="form-group">
-            <label for="clientId" class="required">Klient</label>
+            <label for="clientId" class="required">Client</label>
             <select
               id="clientId"
               formControlName="clientId"
               class="form-select"
               [class.invalid]="isFieldInvalid('clientId')">
               <option value="">Wybierz klienta</option>
-              <option *ngFor="let klient of klienci" [value]="klient.id">
-                {{ getKlientFullName(klient) }} - {{ klient.email }}
+              <option *ngFor="let client of clients" [value]="client.id">
+                {{ getClientFullName(client) }} - {{ client.email }}
               </option>
             </select>
             <div *ngIf="isFieldInvalid('clientId')" class="error-message">
@@ -302,14 +302,14 @@
               class="form-select"
               [class.invalid]="isFieldInvalid('carId')">
               <option value="">Wybierz samochód</option>
-              <option *ngFor="let samochod of dostepneSamochody" [value]="samochod.id">
-                {{ getSamochodFullName(samochod) }} - {{ samochod.dailyPrice | currency:'PLN':'symbol':'1.2-2' }}/dzień
+              <option *ngFor="let samochod of availableCars" [value]="samochod.id">
+                {{ getCarFullName(samochod) }} - {{ samochod.dailyPrice | currency:'PLN':'symbol':'1.2-2' }}/dzień
               </option>
             </select>
             <div *ngIf="isFieldInvalid('carId')" class="error-message">
               {{ getFieldError('carId') }}
             </div>
-            <div *ngIf="dostepneSamochody.length === 0" class="info-message">
+            <div *ngIf="availableCars.length === 0" class="info-message">
               <i class="fas fa-info-circle"></i> Brak dostępnych samochodów
             </div>
           </div>
@@ -338,7 +338,7 @@
               formControlName="plannedReturnDate"
               class="form-input"
               [class.invalid]="isFieldInvalid('plannedReturnDate')"
-              [min]="wypozyczenieForm.get('rentalDate')?.value">
+              [min]="rentalForm.get('rentalDate')?.value">
             <div *ngIf="isFieldInvalid('plannedReturnDate')" class="error-message">
               {{ getFieldError('plannedReturnDate') }}
             </div>
@@ -378,7 +378,7 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="!wypozyczenieForm.valid || isLoading || dostepneSamochody.length === 0">
+            [disabled]="!rentalForm.valid || isLoading || availableCars.length === 0">
             <i class="fas fa-car"></i>
             <span *ngIf="!isLoading">Wypożycz samochód</span>
             <span *ngIf="isLoading">Wypożyczanie...</span>
@@ -390,8 +390,8 @@
       <div *ngIf="shouldShowValidationSummary()" class="validation-summary">
         <h5><i class="fas fa-exclamation-triangle"></i> Uzupełnij następujące pola:</h5>
         <ul>
-          <li *ngIf="!isKlientValid">Wybierz klienta</li>
-          <li *ngIf="!isSamochodValid">Wybierz samochód</li>
+          <li *ngIf="!isClientValid">Wybierz klienta</li>
+          <li *ngIf="!isCarValid">Wybierz samochód</li>
           <li *ngIf="!isDateValid">Wprowadź poprawne daty</li>
         </ul>
       </div>

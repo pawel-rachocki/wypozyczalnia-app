@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { KlientService } from '../../../services/client.service';
-import { Klient } from '../../../models/client.model';
+import { ClientService } from '../../../services/client.service';
+import { Client } from '../../../models/client.model';
 
 @Component({
   selector: 'app-klient-list',
@@ -11,37 +11,37 @@ import { Klient } from '../../../models/client.model';
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.css'
 })
-export class KlientListComponent implements OnInit {
-  klienci: Klient[] = [];
+export class ClientListComponent implements OnInit {
+  clients: Client[] = [];
   loading = true;
   error = '';
 
-  constructor(private klientService: KlientService) { }
+  constructor(private clientService: ClientService) { }
 
   ngOnInit(): void {
-    this.loadKlienci();
+    this.loadClients();
   }
 
-  loadKlienci(): void {
+  loadClients(): void {
     this.loading = true;
-    this.klientService.getAllKlienci().subscribe({
+    this.clientService.getAllClients().subscribe({
       next: (data) => {
-        this.klienci = data;
+        this.clients = data;
         this.loading = false;
       },
       error: (error) => {
         this.error = 'Błąd podczas ładowania klientów';
         this.loading = false;
-        console.error('Error loading klienci:', error);
+        console.error('Error loading clients:', error);
       }
     });
   }
 
-  deleteKlient(id: number): void {
+  deleteClient(id: number): void {
     if (confirm('Czy na pewno chcesz usunąć tego klienta?')) {
-      this.klientService.deleteKlient(id).subscribe({
+      this.clientService.deleteClient(id).subscribe({
         next: () => {
-          this.loadKlienci();
+          this.loadClients();
         },
         error: (error) => {
           alert('Błąd podczas usuwania klienta');
