@@ -1,8 +1,7 @@
 package com.wypozyczalnia.car_rental_backend.service;
 
 import com.wypozyczalnia.car_rental_backend.model.entity.*;
-import com.wypozyczalnia.car_rental_backend.model.exception.CarNotFoundException;
-import com.wypozyczalnia.car_rental_backend.repository.WypozyczenieRepository;
+import com.wypozyczalnia.car_rental_backend.repository.RentalRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,149 +20,149 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class WypozyczenieServiceTest {
+class RentalServiceTest {
 
     @Mock
-    private WypozyczenieRepository wypozyczenieRepository;
+    private RentalRepository rentalRepository;
 
     @Mock
-    private SamochodService samochodService;
+    private CarService carService;
 
     @Mock
-    private KlientService klientService;
+    private ClientService clientService;
 
     @InjectMocks
-    private WypozyczenieService wypozyczenieService;
+    private RentalService rentalService;
 
-    private Wypozyczenie testWypozyczenie;
-    private Klient testKlient;
-    private Samochod testSamochod;
+    private Rental testRental;
+    private Client testClient;
+    private Car testCar;
 
     @BeforeEach
     void setUp() {
-        testKlient = new Klient();
-        testKlient.setId(1L);
-        testKlient.setImie("Jan");
-        testKlient.setNazwisko("Kowalski");
-        testKlient.setEmail("jan.kowalski@email.com");
+        testClient = new Client();
+        testClient.setId(1L);
+        testClient.setFirstName("Jan");
+        testClient.setLastName("Kowalski");
+        testClient.setEmail("jan.kowalski@email.com");
 
-        testSamochod = new Samochod();
-        testSamochod.setId(1L);
-        testSamochod.setMarka("Toyota");
-        testSamochod.setModel("Corolla");
-        testSamochod.setCenaZaDzien(BigDecimal.valueOf(100.00));
-        testSamochod.setStatus(StatusSamochodu.DOSTEPNY);
+        testCar = new Car();
+        testCar.setId(1L);
+        testCar.setBrand("Toyota");
+        testCar.setModel("Corolla");
+        testCar.setDailyPrice(BigDecimal.valueOf(100.00));
+        testCar.setStatus(CarStatus.DOSTEPNY);
 
-        testWypozyczenie = new Wypozyczenie();
-        testWypozyczenie.setId(1L);
-        testWypozyczenie.setKlient(testKlient);
-        testWypozyczenie.setSamochod(testSamochod);
-        testWypozyczenie.setDataWypozyczenia(LocalDate.now());
-        testWypozyczenie.setDataZwrotu(LocalDate.now().plusDays(3));
-        testWypozyczenie.setKosztCalkowity(BigDecimal.valueOf(300.00));
-        testWypozyczenie.setStatus(StatusWypozyczenia.AKTYWNE);
+        testRental = new Rental();
+        testRental.setId(1L);
+        testRental.setClient(testClient);
+        testRental.setCar(testCar);
+        testRental.setRentalDate(LocalDate.now());
+        testRental.setReturnDate(LocalDate.now().plusDays(3));
+        testRental.setTotalCost(BigDecimal.valueOf(300.00));
+        testRental.setStatus(RentalStatus.AKTYWNE);
     }
 
     @Test
-    void shouldReturnAllWypozyczenia() {
+    void shouldReturnAllRentals() {
         // given
-        List<Wypozyczenie> expectedWypozyczenia = Arrays.asList(testWypozyczenie);
-        when(wypozyczenieRepository.findAll()).thenReturn(expectedWypozyczenia);
+        List<Rental> expectedRentals = Arrays.asList(testRental);
+        when(rentalRepository.findAll()).thenReturn(expectedRentals);
 
         // when
-        List<Wypozyczenie> result = wypozyczenieService.findAll();
+        List<Rental> result = rentalService.findAll();
 
         // then
         assertEquals(1, result.size());
-        assertEquals(testKlient, result.get(0).getKlient());
-        verify(wypozyczenieRepository, times(1)).findAll();
+        assertEquals(testClient, result.get(0).getClient());
+        verify(rentalRepository, times(1)).findAll();
     }
 
     @Test
     void shouldSuccessfullyRentCar() {
         // given
-        LocalDate dataWypozyczenia = LocalDate.now();
-        LocalDate planowanaDataZwrotu = LocalDate.now().plusDays(3);
+        LocalDate rentalDate = LocalDate.now();
+        LocalDate plannedReturnDate = LocalDate.now().plusDays(3);
 
-        when(klientService.findById(1L)).thenReturn(testKlient);
-        when(samochodService.findById(1L)).thenReturn(testSamochod);
-        when(samochodService.isAvailable(1L)).thenReturn(true);
-        when(wypozyczenieRepository.existsBySamochodIdAndStatus(1L, StatusWypozyczenia.AKTYWNE)).thenReturn(false);
-        when(wypozyczenieRepository.save(any(Wypozyczenie.class))).thenReturn(testWypozyczenie);
-        doNothing().when(samochodService).markAsRented(1L);
+        when(clientService.findById(1L)).thenReturn(testClient);
+        when(carService.findById(1L)).thenReturn(testCar);
+        when(rentalRepository.existsByCarIdAndStatus(1L, RentalStatus.AKTYWNE)).thenReturn(false);
+        when(rentalRepository.save(any(Rental.class))).thenReturn(testRental);
+        doNothing().when(carService).markAsRented(1L);
 
         // when
-        Wypozyczenie result = wypozyczenieService.rentCar(1L, 1L, dataWypozyczenia, planowanaDataZwrotu);
+        Rental result = rentalService.rentCar(1L, 1L, rentalDate, plannedReturnDate);
 
         // then
         assertNotNull(result);
-        assertEquals(testKlient, result.getKlient());
-        assertEquals(testSamochod, result.getSamochod());
-        verify(wypozyczenieRepository, times(1)).save(any(Wypozyczenie.class));
-        verify(samochodService, times(1)).markAsRented(1L);
+        assertEquals(testClient, result.getClient());
+        assertEquals(testCar, result.getCar());
+        verify(rentalRepository, times(1)).save(any(Rental.class));
+        verify(carService, times(1)).markAsRented(1L);
     }
 
     @Test
     void shouldThrowExceptionWhenRentingWithInvalidDates() {
         // given
-        LocalDate dataWypozyczenia = LocalDate.now();
-        LocalDate planowanaDataZwrotu = LocalDate.now().minusDays(1); // Data w przeszłości
+        LocalDate rentalDate = LocalDate.now();
+        LocalDate plannedReturnDate = LocalDate.now().minusDays(1); // Data w przeszłości
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> wypozyczenieService.rentCar(1L, 1L, dataWypozyczenia, planowanaDataZwrotu)
+                () -> rentalService.rentCar(1L, 1L, rentalDate, plannedReturnDate)
         );
 
-        assertEquals("Data zwrotu musi być później niż data wypożyczenia", exception.getMessage());
-        verify(wypozyczenieRepository, never()).save(any(Wypozyczenie.class));
+        assertEquals("Return date must be later than rental date", exception.getMessage());
+        verify(rentalRepository, never()).save(any(Rental.class));
     }
 
     @Test
     void shouldSuccessfullyReturnCar() {
         // given
-        when(wypozyczenieRepository.findById(1L)).thenReturn(Optional.of(testWypozyczenie));
-        when(wypozyczenieRepository.save(any(Wypozyczenie.class))).thenReturn(testWypozyczenie);
-        doNothing().when(samochodService).markAsAvailable(1L);
+        when(rentalRepository.findById(1L)).thenReturn(Optional.of(testRental));
+        when(rentalRepository.save(any(Rental.class))).thenReturn(testRental);
+        doNothing().when(carService).markAsAvailable(1L);
 
         // when
-        Wypozyczenie result = wypozyczenieService.returnCar(1L);
+        Rental result = rentalService.returnCar(1L);
 
         // then
         assertNotNull(result);
-        assertEquals(StatusWypozyczenia.ZAKONCZONE, testWypozyczenie.getStatus());
-        verify(wypozyczenieRepository, times(1)).save(testWypozyczenie);
-        verify(samochodService, times(1)).markAsAvailable(1L);
+        assertEquals(RentalStatus.ZAKONCZONE, testRental.getStatus());
+        verify(rentalRepository, times(1)).save(testRental);
+        verify(carService, times(1)).markAsAvailable(1L);
     }
 
     @Test
     void shouldReturnActiveRentals() {
         // given
-        List<Wypozyczenie> activeRentals = Arrays.asList(testWypozyczenie);
-        when(wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia.AKTYWNE))
+        List<Rental> activeRentals = Arrays.asList(testRental);
+        when(rentalRepository.findByStatusOrderByRentalDateDesc(RentalStatus.AKTYWNE))
                 .thenReturn(activeRentals);
 
         // when
-        List<Wypozyczenie> result = wypozyczenieService.findActiveRentals();
+        List<Rental> result = rentalService.findActiveRentals();
 
         // then
         assertEquals(1, result.size());
-        assertEquals(StatusWypozyczenia.AKTYWNE, result.get(0).getStatus());
-        verify(wypozyczenieRepository, times(1))
-                .findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia.AKTYWNE);
+        assertEquals(RentalStatus.AKTYWNE, result.get(0).getStatus());
+        verify(rentalRepository, times(1))
+                .findByStatusOrderByRentalDateDesc(RentalStatus.AKTYWNE);
     }
     @Test
     void shouldCancelRentalWhenReturnBeforeStartDate() {
         // given
-        when(wypozyczenieRepository.findById(1L)).thenReturn(Optional.of(testWypozyczenie));
-        when(wypozyczenieRepository.save(any(Wypozyczenie.class))).thenReturn(testWypozyczenie);
-        doNothing().when(samochodService).markAsAvailable(1L);
+        testRental.setRentalDate(LocalDate.now().plusDays(2)); // Wypożyczenie w przyszłości
+        when(rentalRepository.findById(1L)).thenReturn(Optional.of(testRental));
+        when(rentalRepository.save(any(Rental.class))).thenReturn(testRental);
+        doNothing().when(carService).markAsAvailable(1L);
 
         // when
-        wypozyczenieService.returnCar(1L);
+        rentalService.returnCar(1L);
 
         // then
-        assertEquals(StatusWypozyczenia.ANULOWANE, testWypozyczenie.getStatus());
-        verify(samochodService, times(1)).markAsAvailable(1L);
+        assertEquals(RentalStatus.ANULOWANE, testRental.getStatus());
+        verify(carService, times(1)).markAsAvailable(1L);
     }
 }

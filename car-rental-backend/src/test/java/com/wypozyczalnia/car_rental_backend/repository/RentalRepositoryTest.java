@@ -16,54 +16,55 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class WypozyczenieRepositoryTest {
+class RentalRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private WypozyczenieRepository wypozyczenieRepository;
+    private RentalRepository rentalRepository;
 
-    private Klient testKlient;
-    private Samochod testSamochod;
-    private Wypozyczenie aktywneWypozyczenie;
-    private Wypozyczenie zakonczoneWypozyczenie;
+    private Client testClient;
+    private Car testCar;
+    private Rental availableRental;
+    private Rental finishedRental;
 
     @BeforeEach
     void setUp() {
         // Klient
-        testKlient = new Klient();
-        testKlient.setImie("Jan");
-        testKlient.setNazwisko("Kowalski");
-        testKlient.setEmail("jan.kowalski@email.com");
-        entityManager.persistAndFlush(testKlient);
+        testClient = new Client();
+        testClient.setFirstName("Jan");
+        testClient.setLastName("Kowalski");
+        testClient.setEmail("jan.kowalski@email.com");
+        entityManager.persistAndFlush(testClient);
 
         // Samochód
-        testSamochod = new Samochod();
-        testSamochod.setMarka("Toyota");
-        testSamochod.setModel("Corolla");
-        testSamochod.setCenaZaDzien(BigDecimal.valueOf(100.00));
-        testSamochod.setStatus(StatusSamochodu.WYPOZYCZONY);
-        entityManager.persistAndFlush(testSamochod);
+        testCar = new Car();
+        testCar.setBrand("Toyota");
+        testCar.setModel("Corolla");
+        testCar.setDailyPrice(BigDecimal.valueOf(100.00));
+        testCar.setStatus(CarStatus.WYPOZYCZONY);
+        entityManager.persistAndFlush(testCar);
 
         // Aktywne wypożyczenie
-        aktywneWypozyczenie = new Wypozyczenie();
-        aktywneWypozyczenie.setKlient(testKlient);
-        aktywneWypozyczenie.setSamochod(testSamochod);
-        aktywneWypozyczenie.setDataWypozyczenia(LocalDate.now().minusDays(2));
-        aktywneWypozyczenie.setKosztCalkowity(BigDecimal.valueOf(300.00));
-        aktywneWypozyczenie.setStatus(StatusWypozyczenia.AKTYWNE);
-        entityManager.persistAndFlush(aktywneWypozyczenie);
+        availableRental = new Rental();
+        availableRental.setClient(testClient);
+        availableRental.setCar(testCar);
+        availableRental.setRentalDate(LocalDate.now().minusDays(2));
+        availableRental.setTotalCost(BigDecimal.valueOf(300.00));
+        availableRental.setStatus(RentalStatus.AKTYWNE);
+        availableRental.setReturnDate(LocalDate.now().plusDays(2));
+        entityManager.persistAndFlush(availableRental);
 
         // Zakończone wypożyczenie
-        zakonczoneWypozyczenie = new Wypozyczenie();
-        zakonczoneWypozyczenie.setKlient(testKlient);
-        zakonczoneWypozyczenie.setSamochod(testSamochod);
-        zakonczoneWypozyczenie.setDataWypozyczenia(LocalDate.now().minusDays(10));
-        zakonczoneWypozyczenie.setDataZwrotu(LocalDate.now().minusDays(7));
-        zakonczoneWypozyczenie.setKosztCalkowity(BigDecimal.valueOf(300.00));
-        zakonczoneWypozyczenie.setStatus(StatusWypozyczenia.ZAKONCZONE);
-        entityManager.persistAndFlush(zakonczoneWypozyczenie);
+        finishedRental = new Rental();
+        finishedRental.setClient(testClient);
+        finishedRental.setCar(testCar);
+        finishedRental.setRentalDate(LocalDate.now().minusDays(10));
+        finishedRental.setReturnDate(LocalDate.now().minusDays(7));
+        finishedRental.setTotalCost(BigDecimal.valueOf(300.00));
+        finishedRental.setStatus(RentalStatus.ZAKONCZONE);
+        entityManager.persistAndFlush(finishedRental);
     }
 
     @Test
@@ -71,13 +72,13 @@ class WypozyczenieRepositoryTest {
         // given - dane w setUp()
 
         // when
-        List<Wypozyczenie> result = wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia.AKTYWNE);
+        List<Rental> result = rentalRepository.findByStatusOrderByRentalDateDesc(RentalStatus.AKTYWNE);
 
         // then
         assertEquals(1, result.size());
-        assertEquals(StatusWypozyczenia.AKTYWNE, result.get(0).getStatus());
-        assertEquals(testKlient, result.get(0).getKlient());
-        assertEquals(testSamochod, result.get(0).getSamochod());
+        assertEquals(RentalStatus.AKTYWNE, result.get(0).getStatus());
+        assertEquals(testClient, result.get(0).getClient());
+        assertEquals(testCar, result.get(0).getCar());
     }
 
     @Test
@@ -85,12 +86,12 @@ class WypozyczenieRepositoryTest {
         // given - dane w setUp()
 
         // when
-        List<Wypozyczenie> result = wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(StatusWypozyczenia.ZAKONCZONE);
+        List<Rental> result = rentalRepository.findByStatusOrderByRentalDateDesc(RentalStatus.ZAKONCZONE);
 
         // then
         assertEquals(1, result.size());
-        assertEquals(StatusWypozyczenia.ZAKONCZONE, result.get(0).getStatus());
-        assertNotNull(result.get(0).getDataZwrotu());
+        assertEquals(RentalStatus.ZAKONCZONE, result.get(0).getStatus());
+        assertNotNull(result.get(0).getReturnDate());
     }
 
     @Test
@@ -98,15 +99,15 @@ class WypozyczenieRepositoryTest {
         // given - dane w setUp()
 
         // when
-        List<Wypozyczenie> result = wypozyczenieRepository.findByKlientIdOrderByDataWypozyczeniaDesc(testKlient.getId());
+        List<Rental> result = rentalRepository.findByClientIdOrderByRentalDateDesc(testClient.getId());
 
         // then
         assertEquals(2, result.size()); // Aktywne + zakończone
-        result.forEach(wypozyczenie -> assertEquals(testKlient.getId(), wypozyczenie.getKlient().getId()));
+        result.forEach(wypozyczenie -> assertEquals(testClient.getId(), wypozyczenie.getClient().getId()));
 
-        // Sprawdź sortowanie (najnowsze pierwsze)
-        assertTrue(result.get(0).getDataWypozyczenia().isAfter(result.get(1).getDataWypozyczenia()) ||
-                result.get(0).getDataWypozyczenia().isEqual(result.get(1).getDataWypozyczenia()));
+        // najnowsze w pierwszej kolejności
+        assertTrue(result.get(0).getRentalDate().isAfter(result.get(1).getRentalDate()) ||
+                result.get(0).getRentalDate().isEqual(result.get(1).getRentalDate()));
     }
 
     @Test
@@ -114,7 +115,7 @@ class WypozyczenieRepositoryTest {
         // given - dane w setUp()
 
         // when
-        boolean exists = wypozyczenieRepository.existsBySamochodIdAndStatus(testSamochod.getId(), StatusWypozyczenia.AKTYWNE);
+        boolean exists = rentalRepository.existsByCarIdAndStatus(testCar.getId(), RentalStatus.AKTYWNE);
 
         // then
         assertTrue(exists);

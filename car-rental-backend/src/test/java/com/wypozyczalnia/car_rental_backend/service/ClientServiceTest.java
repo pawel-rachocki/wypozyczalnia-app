@@ -1,7 +1,7 @@
 package com.wypozyczalnia.car_rental_backend.service;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Klient;
-import com.wypozyczalnia.car_rental_backend.repository.KlientRepository;
+import com.wypozyczalnia.car_rental_backend.model.entity.Client;
+import com.wypozyczalnia.car_rental_backend.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,157 +18,153 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class KlientServiceTest {
+class ClientServiceTest {
 
     @Mock
-    private KlientRepository klientRepository;
+    private ClientRepository clientRepository;
 
     @InjectMocks
-    private KlientService klientService;
+    private ClientService clientService;
 
-    private Klient testKlient;
+    private Client testClient;
 
     @BeforeEach
     void setUp() {
-        testKlient = new Klient();
-        testKlient.setId(1L);
-        testKlient.setImie("Jan");
-        testKlient.setNazwisko("Kowalski");
-        testKlient.setEmail("jan.kowalski@email.com");
+        testClient = new Client();
+        testClient.setId(1L);
+        testClient.setFirstName("Jan");
+        testClient.setLastName("Kowalski");
+        testClient.setEmail("jan.kowalski@email.com");
     }
 
     @Test
-    void shouldReturnAllKlienci() {
+    void shouldReturnAllClients() {
         // given
-        List<Klient> expectedKlienci = Arrays.asList(testKlient);
-        when(klientRepository.findAll()).thenReturn(expectedKlienci);
+        List<Client> expectedKlienci = Arrays.asList(testClient);
+        when(clientRepository.findAll()).thenReturn(expectedKlienci);
 
         // when
-        List<Klient> result = klientService.findAll();
+        List<Client> result = clientService.findAll();
 
         // then
         assertEquals(1, result.size());
-        assertEquals("Jan", result.get(0).getImie());
-        verify(klientRepository, times(1)).findAll();
+        assertEquals("Jan", result.get(0).getFirstName());
+        verify(clientRepository, times(1)).findAll();
     }
 
     @Test
-    void shouldReturnKlientWhenValidId() {
+    void shouldReturnClientWhenValidId() {
         // given
-        when(klientRepository.findById(1L)).thenReturn(Optional.of(testKlient));
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
 
         // when
-        Klient result = klientService.findById(1L);
+        Client result = clientService.findById(1L);
 
         // then
         assertNotNull(result);
-        assertEquals("Jan", result.getImie());
-        assertEquals("Kowalski", result.getNazwisko());
-        verify(klientRepository, times(1)).findById(1L);
+        assertEquals("Jan", result.getFirstName());
+        assertEquals("Kowalski", result.getLastName());
+        verify(clientRepository, times(1)).findById(1L);
     }
 
     @Test
-    void shouldSaveValidKlient() {
+    void shouldSaveValidClient() {
         // given
-        Klient newKlient = new Klient("Anna", "Nowak", "anna.nowak@email.com");
-        when(klientRepository.existsByEmail("anna.nowak@email.com")).thenReturn(false);
-        when(klientRepository.save(any(Klient.class))).thenReturn(newKlient);
+        Client newClient = new Client("Anna", "Nowak", "anna.nowak@email.com");
+        when(clientRepository.existsByEmail("anna.nowak@email.com")).thenReturn(false);
+        when(clientRepository.save(any(Client.class))).thenReturn(newClient);
 
         // when
-        Klient result = klientService.save(newKlient);
+        Client result = clientService.save(newClient);
 
         // then
         assertNotNull(result);
-        assertEquals("Anna", result.getImie());
-        assertEquals("Nowak", result.getNazwisko());
+        assertEquals("Anna", result.getFirstName());
+        assertEquals("Nowak", result.getLastName());
         assertEquals("anna.nowak@email.com", result.getEmail());
-        verify(klientRepository, times(1)).existsByEmail("anna.nowak@email.com");
-        verify(klientRepository, times(1)).save(newKlient);
+        verify(clientRepository, times(1)).existsByEmail("anna.nowak@email.com");
+        verify(clientRepository, times(1)).save(newClient);
     }
 
     @Test
     void shouldThrowExceptionWhenSavingDuplicateEmail() {
         // given
-        Klient duplicateKlient = new Klient("Anna", "Nowak", "jan.kowalski@email.com");
-        when(klientRepository.existsByEmail("jan.kowalski@email.com")).thenReturn(true);
+        Client duplicateClient = new Client("Anna", "Nowak", "jan.kowalski@email.com");
+        when(clientRepository.existsByEmail("jan.kowalski@email.com")).thenReturn(true);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> klientService.save(duplicateKlient)
+                () -> clientService.save(duplicateClient)
         );
 
-        assertEquals("Klient z emailem jan.kowalski@email.com już istnieje w systemie", exception.getMessage());
-        verify(klientRepository, times(1)).existsByEmail("jan.kowalski@email.com");
-        verify(klientRepository, never()).save(any(Klient.class));
+        assertEquals("Client with email jan.kowalski@email.com already exists", exception.getMessage());
+        verify(clientRepository, times(1)).existsByEmail("jan.kowalski@email.com");
+        verify(clientRepository, never()).save(any(Client.class));
     }
 
     @Test
     void shouldThrowExceptionWhenSavingWithInvalidEmail() {
         // given
-        Klient invalidKlient = new Klient("Jan", "Kowalski", "invalid-email");
+        Client invalidClient = new Client("Jan", "Kowalski", "invalid-email");
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> klientService.save(invalidKlient)
+                () -> clientService.save(invalidClient)
         );
 
-        assertEquals("Email ma nieprawidłowy format", exception.getMessage());
-        verify(klientRepository, never()).save(any(Klient.class));
+        assertEquals("Email has invalid format", exception.getMessage());
+        verify(clientRepository, never()).save(any(Client.class));
     }
 
     @Test
-    void shouldUpdateExistingKlient() {
+    void shouldUpdateExistingClient() {
         // given
-        Klient updateData = new Klient("Jan", "Nowak", "jan.nowak@email.com");
-        when(klientRepository.findById(1L)).thenReturn(Optional.of(testKlient));
-        when(klientRepository.existsByEmail("jan.nowak@email.com")).thenReturn(false);
-        when(klientRepository.save(any(Klient.class))).thenReturn(testKlient);
+        Client updateData = new Client("Jan", "Nowak", "jan.nowak@email.com");
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
+        when(clientRepository.existsByEmail("jan.nowak@email.com")).thenReturn(false);
+        when(clientRepository.save(any(Client.class))).thenReturn(testClient);
 
         // when
-        Klient result = klientService.update(1L, updateData);
+        Client result = clientService.update(1L, updateData);
 
         // then
         assertNotNull(result);
-        assertEquals("Jan", testKlient.getImie());
-        assertEquals("Nowak", testKlient.getNazwisko());
-        assertEquals("jan.nowak@email.com", testKlient.getEmail());
-        verify(klientRepository, times(1)).findById(1L);
-        verify(klientRepository, times(1)).save(testKlient);
+        assertEquals("Jan", testClient.getFirstName());
+        assertEquals("Nowak", testClient.getLastName());
+        assertEquals("jan.nowak@email.com", testClient.getEmail());
+        verify(clientRepository, times(1)).findById(1L);
+        verify(clientRepository, times(1)).save(testClient);
     }
 
     @Test
-    void shouldDeleteKlientWithoutActiveRentals() {
+    void shouldDeleteClientWithoutActiveRentals() {
         // given
-        when(klientRepository.findById(1L)).thenReturn(Optional.of(testKlient));
-        when(klientRepository.hasActiveRentals(1L)).thenReturn(false);
-        doNothing().when(klientRepository).deleteById(1L);
+        when(clientRepository.hasActiveRentals(1L)).thenReturn(false);
+        doNothing().when(clientRepository).deleteById(1L);
 
         // when
-        klientService.delete(1L);
+        clientService.delete(1L);
 
         // then
-        verify(klientRepository, times(1)).findById(1L);
-        verify(klientRepository, times(1)).hasActiveRentals(1L);
-        verify(klientRepository, times(1)).deleteById(1L);
+        verify(clientRepository, times(1)).hasActiveRentals(1L);
+        verify(clientRepository, times(1)).deleteById(1L);
     }
 
     @Test
-    void shouldThrowExceptionWhenDeletingKlientWithActiveRentals() {
+    void shouldThrowExceptionWhenDeletingClientWithActiveRentals() {
         // given
-        when(klientRepository.findById(1L)).thenReturn(Optional.of(testKlient));
-        when(klientRepository.hasActiveRentals(1L)).thenReturn(true);
+        when(clientRepository.hasActiveRentals(1L)).thenReturn(true);
 
         // when & then
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
-                () -> klientService.delete(1L)
+                () -> clientService.delete(1L)
         );
 
-        assertEquals("Nie można usunąć klienta z aktywnymi wypożyczeniami", exception.getMessage());
-        verify(klientRepository, times(1)).findById(1L);
-        verify(klientRepository, times(1)).hasActiveRentals(1L);
-        verify(klientRepository, never()).deleteById(1L);
+        assertEquals("Cannot delete client with active rentals", exception.getMessage());
+        verify(clientRepository, times(1)).hasActiveRentals(1L);
+        verify(clientRepository, never()).deleteById(1L);
     }
 }

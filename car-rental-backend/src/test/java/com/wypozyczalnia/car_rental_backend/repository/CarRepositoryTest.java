@@ -1,7 +1,7 @@
 package com.wypozyczalnia.car_rental_backend.repository;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Samochod;
-import com.wypozyczalnia.car_rental_backend.model.entity.StatusSamochodu;
+import com.wypozyczalnia.car_rental_backend.model.entity.Car;
+import com.wypozyczalnia.car_rental_backend.model.entity.CarStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,47 +16,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class SamochodRepositoryTest {
+class CarRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private SamochodRepository samochodRepository;
+    private CarRepository carRepository;
 
-    private Samochod dostepnySamochod;
-    private Samochod wypozyczonySamochod;
+    private Car availableCar;
+    private Car rentedCar;
 
     @BeforeEach
     void setUp() {
-        dostepnySamochod = new Samochod();
-        dostepnySamochod.setMarka("Toyota");
-        dostepnySamochod.setModel("Corolla");
-        dostepnySamochod.setCenaZaDzien(BigDecimal.valueOf(100.00));
-        dostepnySamochod.setStatus(StatusSamochodu.DOSTEPNY);
+        availableCar = new Car();
+        availableCar.setBrand("Toyota");
+        availableCar.setModel("Corolla");
+        availableCar.setDailyPrice(BigDecimal.valueOf(100.00));
+        availableCar.setStatus(CarStatus.DOSTEPNY);
 
-        wypozyczonySamochod = new Samochod();
-        wypozyczonySamochod.setMarka("Honda");
-        wypozyczonySamochod.setModel("Civic");
-        wypozyczonySamochod.setCenaZaDzien(BigDecimal.valueOf(120.00));
-        wypozyczonySamochod.setStatus(StatusSamochodu.WYPOZYCZONY);
+        rentedCar = new Car();
+        rentedCar.setBrand("Honda");
+        rentedCar.setModel("Civic");
+        rentedCar.setDailyPrice(BigDecimal.valueOf(120.00));
+        rentedCar.setStatus(CarStatus.WYPOZYCZONY);
 
-        entityManager.persistAndFlush(dostepnySamochod);
-        entityManager.persistAndFlush(wypozyczonySamochod);
+        entityManager.persistAndFlush(availableCar);
+        entityManager.persistAndFlush(rentedCar);
     }
 
     @Test
-    void shouldFindAvailableCarsSortedByMarkaAndModel() {
+    void shouldFindAvailableCarsSortedByBrandAndModel() {
         // given - dane w setUp()
 
         // when
-        List<Samochod> result = samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY);
+        List<Car> result = carRepository.findByStatusOrderByBrandAscModelAsc(CarStatus.DOSTEPNY);
 
         // then
         assertEquals(1, result.size());
-        assertEquals("Toyota", result.get(0).getMarka());
+        assertEquals("Toyota", result.get(0).getBrand());
         assertEquals("Corolla", result.get(0).getModel());
-        assertEquals(StatusSamochodu.DOSTEPNY, result.get(0).getStatus());
+        assertEquals(CarStatus.DOSTEPNY, result.get(0).getStatus());
     }
 
     @Test
@@ -64,12 +64,12 @@ class SamochodRepositoryTest {
         // given - dane w setUp()
 
         // when
-        List<Samochod> result = samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.WYPOZYCZONY);
+        List<Car> result = carRepository.findByStatusOrderByBrandAscModelAsc(CarStatus.WYPOZYCZONY);
 
         // then
         assertEquals(1, result.size());
-        assertEquals("Honda", result.get(0).getMarka());
-        assertEquals(StatusSamochodu.WYPOZYCZONY, result.get(0).getStatus());
+        assertEquals("Honda", result.get(0).getBrand());
+        assertEquals(CarStatus.WYPOZYCZONY, result.get(0).getStatus());
     }
 
     @Test
@@ -77,7 +77,7 @@ class SamochodRepositoryTest {
         // given - dane w setUp()
 
         // when
-        boolean exists = samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("TOYOTA", "corolla");
+        boolean exists = carRepository.existsByBrandIgnoreCaseAndModelIgnoreCase("TOYOTA", "corolla");
 
         // then
         assertTrue(exists);
@@ -88,29 +88,29 @@ class SamochodRepositoryTest {
         // given - dane w setUp()
 
         // when
-        boolean exists = samochodRepository.existsByMarkaIgnoreCaseAndModelIgnoreCase("BMW", "X5");
+        boolean exists = carRepository.existsByBrandIgnoreCaseAndModelIgnoreCase("BMW", "X5");
 
         // then
         assertFalse(exists);
     }
 
     @Test
-    void shouldFindCarsByMarkaIgnoreCase() {
+    void shouldFindCarsByBrandIgnoreCase() {
         // given
-        Samochod anotherToyota = new Samochod();
-        anotherToyota.setMarka("Toyota");
+        Car anotherToyota = new Car();
+        anotherToyota.setBrand("Toyota");
         anotherToyota.setModel("Camry");
-        anotherToyota.setCenaZaDzien(BigDecimal.valueOf(150.00));
-        anotherToyota.setStatus(StatusSamochodu.DOSTEPNY);
+        anotherToyota.setDailyPrice(BigDecimal.valueOf(150.00));
+        anotherToyota.setStatus(CarStatus.DOSTEPNY);
         entityManager.persistAndFlush(anotherToyota);
 
         // when
-        List<Samochod> result = samochodRepository.findByMarkaIgnoreCaseOrderByModelAsc("toyota");
+        List<Car> result = carRepository.findByBrandIgnoreCaseOrderByModelAsc("toyota");
 
         // then
         assertEquals(2, result.size());
         assertEquals("Camry", result.get(0).getModel());
         assertEquals("Corolla", result.get(1).getModel());
-        result.forEach(samochod -> assertEquals("Toyota", samochod.getMarka()));
+        result.forEach(samochod -> assertEquals("Toyota", samochod.getBrand()));
     }
 }

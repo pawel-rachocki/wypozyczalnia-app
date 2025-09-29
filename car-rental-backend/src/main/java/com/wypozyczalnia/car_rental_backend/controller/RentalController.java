@@ -1,11 +1,12 @@
 package com.wypozyczalnia.car_rental_backend.controller;
 
-import com.wypozyczalnia.car_rental_backend.model.dto.WypozyczenieRequest;
-import com.wypozyczalnia.car_rental_backend.model.entity.Wypozyczenie;
+import com.wypozyczalnia.car_rental_backend.model.dto.RentalRequest;
+import com.wypozyczalnia.car_rental_backend.model.entity.Client;
+import com.wypozyczalnia.car_rental_backend.model.entity.Rental;
 import com.wypozyczalnia.car_rental_backend.model.exception.CarNotFoundException;
 import com.wypozyczalnia.car_rental_backend.model.exception.ClientNotFoundException;
 import com.wypozyczalnia.car_rental_backend.model.exception.RentalNotFoundException;
-import com.wypozyczalnia.car_rental_backend.service.WypozyczenieService;
+import com.wypozyczalnia.car_rental_backend.service.RentalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,59 +14,58 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/wypozyczenia")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-public class WypozyczenieController {
+public class RentalController {
 
-    private final WypozyczenieService wypozyczenieService;
-
+    private final RentalService rentalService;
 
     @GetMapping
-    public ResponseEntity<List<Wypozyczenie>> getAllWypozyczenia() {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findAll();
+    public ResponseEntity<List<Rental>> getAllRentals() {
+        List<Rental> wypozyczenia = rentalService.findAll();
         return ResponseEntity.ok(wypozyczenia);
     }
     @GetMapping("/aktywne")
-    public ResponseEntity<List<Wypozyczenie>> getActiveRentals() {
-        List<Wypozyczenie> wypozyczenia = wypozyczenieService.findActiveRentals();
+    public ResponseEntity<List<Rental>> getActiveRentals() {
+        List<Rental> wypozyczenia = rentalService.findActiveRentals();
         return ResponseEntity.ok(wypozyczenia);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Wypozyczenie> getWypozyczenieById(@PathVariable Long id) {
-        return wypozyczenieService.findById(id)
-                .map(wypozyczenie -> ResponseEntity.ok(wypozyczenie))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Rental> getRentalById(@PathVariable Long id) {
+        try {
+            Rental rental = rentalService.findById(id);
+            return ResponseEntity.ok(rental);
+        }catch (RentalNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // ===== OPERACJE WYPOŻYCZANIA =====
-
     @PostMapping("/wypozycz")
-    public ResponseEntity<Wypozyczenie> rentCar(@Valid @RequestBody WypozyczenieRequest request) {
+    public ResponseEntity<Rental> rentCar(@Valid @RequestBody RentalRequest request) {
         try {
-            Wypozyczenie wypozyczenie = wypozyczenieService.rentCar(
-                    request.getKlientId(),
-                    request.getSamochodId(),
-                    request.getDataWypozyczenia(),
-                    request.getPlanowanaDataZwrotu()
+            Rental rental = rentalService.rentCar(
+                    request.getClientId(),
+                    request.getCarId(),
+                    request.getRentalDate(),
+                    request.getPlannedReturnDate()
             );
-            return ResponseEntity.status(HttpStatus.CREATED).body(wypozyczenie);
+            return ResponseEntity.status(HttpStatus.CREATED).body(rental);
         } catch (IllegalArgumentException | IllegalStateException | ClientNotFoundException | CarNotFoundException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}/zwroc")
-    public ResponseEntity<Wypozyczenie> returnCar(@PathVariable Long id) {
+    public ResponseEntity<Rental> returnCar(@PathVariable Long id) {
         try {
-            Wypozyczenie wypozyczenie = wypozyczenieService.returnCar(id);
-            return ResponseEntity.ok(wypozyczenie);
-        } catch (IllegalArgumentException | RentalNotFoundException e) {
+            Rental rental = rentalService.returnCar(id);
+            return ResponseEntity.ok(rental);
+        } catch (RentalNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();

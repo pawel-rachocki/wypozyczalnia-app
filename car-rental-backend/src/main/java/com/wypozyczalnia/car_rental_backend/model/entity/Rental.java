@@ -13,70 +13,61 @@ import java.time.Period;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
-@Table(name = "wypozyczenia")
+@Table(name = "rentals")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wypozyczenie {
+public class Rental {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Atrybut (klient) jest wymagany")
+    @NotNull(message = "Client is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "klient_id", nullable = false)
-    private Klient klient;
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
 
-    @NotNull(message = "Atrybut (samochod) jest wymagany")
+    @NotNull(message = "Car is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "samochod_id", nullable = false)
+    @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
-    @NotNull(message = "Atrybut (data wypożyczenia) jest wymagany")
-    @Column(name = "data_wypozyczenia", nullable = false)
-    private LocalDate dataWypozyczenia;
+    @NotNull(message = "Rental date is required")
+    @Column(name = "rental_date", nullable = false)
+    private LocalDate rentalDate;
 
-    @NotNull(message = "Atrybut (data zwrotu) jest wymagany")
-    @Column(name = "data_zwrotu")
-    private LocalDate dataZwrotu;
+    @NotNull(message = "Return date is required")
+    @Column(name = "return_date")
+    private LocalDate returnDate;
 
-    @NotNull(message = "Atrybut (koszt całkowity) jest wymagany")
-    @Column(name = "koszt_calkowity", nullable = false, precision = 10, scale = 2)
-    private BigDecimal kosztCalkowity;
+    @NotNull(message = "Total cost is required")
+    @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalCost;
 
-    @NotNull(message = "Atrybut (status wypożyczenia) jest wymagany")
+    @NotNull(message = "Rental status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private StatusWypozyczenia status;
+    private RentalStatus status;
 
-    public Wypozyczenie(Klient klient, Car car, LocalDate dataWypozyczenia, BigDecimal kosztCalkowity, LocalDate dataZwrotu) {
-        this.klient = klient;
+    public Rental(Client client, Car car, LocalDate rentalDate, BigDecimal totalCost, LocalDate returnDate) {
+        this.client = client;
         this.car = car;
-        this.dataWypozyczenia = dataWypozyczenia;
-        this.kosztCalkowity = kosztCalkowity;
-        this.dataZwrotu = dataZwrotu;
-        this.status = StatusWypozyczenia.AKTYWNE;
-    }
-
-    public int getLiczbaDni(){
-        LocalDate koniecData = (dataZwrotu != null) ? dataZwrotu : LocalDate.now();
-        return Period.between(dataWypozyczenia,koniecData).getDays();
-    }
-
-    public boolean isActive(){
-        return StatusWypozyczenia.AKTYWNE.equals(this.status);
+        this.rentalDate = rentalDate;
+        this.totalCost = totalCost;
+        this.returnDate = returnDate;
+        this.status = RentalStatus.AKTYWNE;
     }
 
     @Override
     public String toString() {
-        return "Wypozyczenie{" +
+        return "Rental{" +
                 "id=" + id +
-                ", klient=" + klient +
-                ", samochod=" + car +
-                ", dataWypozyczenia=" + dataWypozyczenia +
-                ", dataZwrotu=" + dataZwrotu +
-                ", kosztCalkowity=" + kosztCalkowity +
+                ", client=" + client +
+                ", car=" + car +
+                ", rentalDate=" + rentalDate +
+                ", returnDate=" + returnDate +
+                ", totalCost=" + totalCost +
                 ", status=" + status +
                 '}';
     }

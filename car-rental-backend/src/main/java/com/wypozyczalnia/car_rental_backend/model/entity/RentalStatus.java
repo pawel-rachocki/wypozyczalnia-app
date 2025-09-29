@@ -1,6 +1,6 @@
 package com.wypozyczalnia.car_rental_backend.model.entity;
 
-public enum StatusWypozyczenia {
+public enum RentalStatus {
     AKTYWNE("Aktywne"),
     ZAKONCZONE("Zakończone"),
     PRZETERMINOWANE("Przeterminowane"),
@@ -8,12 +8,8 @@ public enum StatusWypozyczenia {
 
     private final String displayName;
 
-    StatusWypozyczenia(String displayName) {
+    RentalStatus(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 
     @Override

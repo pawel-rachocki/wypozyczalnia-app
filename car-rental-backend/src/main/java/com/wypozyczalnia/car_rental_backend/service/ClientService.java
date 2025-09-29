@@ -1,7 +1,7 @@
 package com.wypozyczalnia.car_rental_backend.service;
-import com.wypozyczalnia.car_rental_backend.model.entity.Klient;
+import com.wypozyczalnia.car_rental_backend.model.entity.Client;
 import com.wypozyczalnia.car_rental_backend.model.exception.ClientNotFoundException;
-import com.wypozyczalnia.car_rental_backend.repository.KlientRepository;
+import com.wypozyczalnia.car_rental_backend.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,123 +12,115 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class KlientService {
+public class ClientService {
 
-    private final KlientRepository klientRepository;
+    private final ClientRepository clientRepository;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
     );
 
-    // ===== OPERACJE CRUD =====
-
-    public List<Klient> findAll() {
-        return klientRepository.findAll();
+    public List<Client> findAll() {
+        return clientRepository.findAll();
     }
 
-    public Klient findById(Long id) {
-        return klientRepository.findById(id)
+    public Client findById(Long id) {
+        return clientRepository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException(id));
     }
 
     @Transactional
-    public Klient save(Klient klient) {
-        validateKlient(klient);
+    public Client save(Client client) {
+        validateClient(client);
 
-        if (klientRepository.existsByEmail(klient.getEmail())) {
+        if (clientRepository.existsByEmail(client.getEmail())) {
             throw new IllegalArgumentException(
-                    String.format("Klient z emailem %s już istnieje w systemie", klient.getEmail()));
+                    String.format("Client with email %s already exists", client.getEmail()));
         }
 
-        klient.setImie(normalizeText(klient.getImie()));
-        klient.setNazwisko(normalizeText(klient.getNazwisko()));
-        klient.setEmail(klient.getEmail().toLowerCase().trim());
+        client.setFirstName(normalizeText(client.getFirstName()));
+        client.setLastName(normalizeText(client.getLastName()));
+        client.setEmail(client.getEmail().toLowerCase().trim());
 
-        Klient saved = klientRepository.save(klient);
+        Client saved = clientRepository.save(client);
 
         return saved;
     }
 
     @Transactional
-    public Klient update(Long id, Klient klientUpdate) {
+    public Client update(Long id, Client clientUpdate) {
 
-        Klient existing = klientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Klient o ID " + id + " nie istnieje"));
+        Client existing = clientRepository.findById(id)
+                .orElseThrow(() -> new ClientNotFoundException(id));
 
-        validateKlient(klientUpdate);
+        validateClient(clientUpdate);
 
-        if (!existing.getEmail().equalsIgnoreCase(klientUpdate.getEmail())) {
-            if (klientRepository.existsByEmail(klientUpdate.getEmail())) {
+        if (!existing.getEmail().equalsIgnoreCase(clientUpdate.getEmail())) {
+            if (clientRepository.existsByEmail(clientUpdate.getEmail())) {
                 throw new IllegalArgumentException(
-                        String.format("Klient z emailem %s już istnieje w systemie", klientUpdate.getEmail()));
+                        String.format("Client with email %s already exists", clientUpdate.getEmail()));
             }
         }
 
-        existing.setImie(normalizeText(klientUpdate.getImie()));
-        existing.setNazwisko(normalizeText(klientUpdate.getNazwisko()));
-        existing.setEmail(klientUpdate.getEmail().toLowerCase().trim());
+        existing.setFirstName(normalizeText(clientUpdate.getFirstName()));
+        existing.setLastName(normalizeText(clientUpdate.getLastName()));
+        existing.setEmail(clientUpdate.getEmail().toLowerCase().trim());
 
-        Klient updated = klientRepository.save(existing);
+        Client updated = clientRepository.save(existing);
 
         return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-
-        Klient klient = klientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Klient o ID " + id + " nie istnieje"));
-
-        if (klientRepository.hasActiveRentals(id)) {
-            throw new IllegalStateException("Nie można usunąć klienta z aktywnymi wypożyczeniami");
+        if (clientRepository.hasActiveRentals(id)) {
+            throw new IllegalStateException("Cannot delete client with active rentals");
         }
 
-        klientRepository.deleteById(id);
+        clientRepository.deleteById(id);
     }
 
-    // ===== METODY WALIDACJI + POMOCNICZE =====
+    private void validateClient(Client client) {
 
-    private void validateKlient(Klient klient) {
-
-        if (klient.getImie() == null || klient.getImie().trim().isEmpty()) {
-            throw new IllegalArgumentException("Imię jest wymagane");
+        if (client.getFirstName() == null || client.getFirstName().trim().isEmpty()) {
+            throw new IllegalArgumentException("First name is required");
         }
 
-        if (klient.getImie().trim().length() < 2) {
-            throw new IllegalArgumentException("Imię musi mieć co najmniej 2 znaki");
+        if (client.getFirstName().trim().length() < 2) {
+            throw new IllegalArgumentException("First name must be at least 2 characters long");
         }
 
-        if (klient.getImie().trim().length() > 50) {
-            throw new IllegalArgumentException("Imię nie może mieć więcej niż 50 znaków");
+        if (client.getFirstName().trim().length() > 50) {
+            throw new IllegalArgumentException("First name cannot be longer than 50 characters");
         }
 
-        if (klient.getNazwisko() == null || klient.getNazwisko().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nazwisko jest wymagane");
+        if (client.getLastName() == null || client.getLastName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Last name is required");
         }
 
-        if (klient.getNazwisko().trim().length() < 2) {
-            throw new IllegalArgumentException("Nazwisko musi mieć co najmniej 2 znaki");
+        if (client.getLastName().trim().length() < 2) {
+            throw new IllegalArgumentException("Last name must be at least 2 characters long");
         }
 
-        if (klient.getNazwisko().trim().length() > 50) {
-            throw new IllegalArgumentException("Nazwisko nie może mieć więcej niż 50 znaków");
+        if (client.getLastName().trim().length() > 50) {
+            throw new IllegalArgumentException("Last name cannot be longer than 50 characters");
         }
 
-        if (klient.getEmail() == null || klient.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email jest wymagany");
+        if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
         }
 
-        if (!EMAIL_PATTERN.matcher(klient.getEmail().trim()).matches()) {
-            throw new IllegalArgumentException("Email ma nieprawidłowy format");
+        if (!EMAIL_PATTERN.matcher(client.getEmail().trim()).matches()) {
+            throw new IllegalArgumentException("Email has invalid format");
         }
 
-        if (klient.getEmail().trim().length() > 100) {
-            throw new IllegalArgumentException("Email nie może mieć więcej niż 100 znaków");
+        if (client.getEmail().trim().length() > 255) {
+            throw new IllegalArgumentException("Email cannot be longer than 255 characters");
         }
 
-        if (containsInvalidCharacters(klient.getImie()) ||
-                containsInvalidCharacters(klient.getNazwisko())) {
-            throw new IllegalArgumentException("Imię i nazwisko mogą zawierać tylko litery, spacje, myślniki i apostrofy");
+        if (containsInvalidCharacters(client.getFirstName()) ||
+                containsInvalidCharacters(client.getLastName())) {
+            throw new IllegalArgumentException("First name and last name can only contain letters, spaces, hyphens and apostrophes");
         }
     }
 

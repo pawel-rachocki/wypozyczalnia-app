@@ -1,7 +1,8 @@
 package com.wypozyczalnia.car_rental_backend.controller;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Klient;
-import com.wypozyczalnia.car_rental_backend.service.KlientService;
+import com.wypozyczalnia.car_rental_backend.model.entity.Client;
+import com.wypozyczalnia.car_rental_backend.model.exception.ClientNotFoundException;
+import com.wypozyczalnia.car_rental_backend.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,31 +15,30 @@ import java.util.List;
 @RequestMapping("/api/klienci")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-public class KlientController {
+public class ClientController {
 
-    private final KlientService klientService;
-
+    private final ClientService clientService;
 
     @GetMapping
-    public ResponseEntity<List<Klient>> getAllKlienci() {
-        List<Klient> klienci = klientService.findAll();
-        return ResponseEntity.ok(klienci);
+    public ResponseEntity<List<Client>> getAllClients() {
+        List<Client> clients = clientService.findAll();
+        return ResponseEntity.ok(clients);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Klient> getKlientById(@PathVariable Long id) {
+    public ResponseEntity<Client> getClientById(@PathVariable Long id) {
         try {
-            Klient client = klientService.findById(id);
+            Client client = clientService.findById(id);
             return ResponseEntity.ok(client);
-        } catch (IllegalStateException e) {
+        } catch (ClientNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PostMapping
-    public ResponseEntity<Klient> createKlient(@Valid @RequestBody Klient klient) {
+    public ResponseEntity<Client> createClient(@Valid @RequestBody Client client) {
         try {
-            Klient saved = klientService.save(klient);
+            Client saved = clientService.save(client);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -46,22 +46,21 @@ public class KlientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Klient> updateKlient(@PathVariable Long id,
-                                               @Valid @RequestBody Klient klient) {
+    public ResponseEntity<Client> updateClient(@PathVariable Long id, @Valid @RequestBody Client client) {
         try {
-            Klient updated = klientService.update(id, klient);
+            Client updated = clientService.update(id, client);
             return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
+        } catch (ClientNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteKlient(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
         try {
-            klientService.delete(id);
+            clientService.delete(id);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (ClientNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

@@ -12,19 +12,19 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WypozyczenieRequest {
+public class RentalRequest {
 
-    @NotNull(message = "ID klienta jest wymagane")
-    private Long klientId;
+    @NotNull(message = "Client ID is required")
+    private Long clientId;
 
-    @NotNull(message = "ID samochodu jest wymagane")
-    private Long samochodId;
+    @NotNull(message = "Car ID is required")
+    private Long carId;
 
-    @NotNull(message = "Data wypożyczenia jest wymagana")
-    @FutureOrPresent(message = "Data wypożyczenia nie może być w przeszłości")
-    private LocalDate dataWypozyczenia;
+    @NotNull(message = "Rental date is required")
+    @FutureOrPresent(message = "Rental date cannot be in the past")
+    private LocalDate rentalDate;
 
-    @NotNull(message = "Planowana data zwrotu jest wymagana")
-    @Future(message = "Planowana data zwrotu musi być w przyszłości")
-    private LocalDate planowanaDataZwrotu;
+    @NotNull(message = "Planned return date is required")
+    @Future(message = "Planned return date must be in the future")
+    private LocalDate plannedReturnDate;
 }

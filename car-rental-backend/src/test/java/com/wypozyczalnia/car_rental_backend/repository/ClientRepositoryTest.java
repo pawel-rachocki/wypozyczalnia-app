@@ -1,6 +1,6 @@
 package com.wypozyczalnia.car_rental_backend.repository;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Klient;
+import com.wypozyczalnia.car_rental_backend.model.entity.Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,37 +14,37 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class KlientRepositoryTest {
+class ClientRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private KlientRepository klientRepository;
+    private ClientRepository clientRepository;
 
-    private Klient testKlient;
+    private Client testClient;
 
     @BeforeEach
     void setUp() {
-        testKlient = new Klient();
-        testKlient.setImie("Jan");
-        testKlient.setNazwisko("Kowalski");
-        testKlient.setEmail("jan.kowalski@email.com");
+        testClient = new Client();
+        testClient.setFirstName("Jan");
+        testClient.setLastName("Kowalski");
+        testClient.setEmail("jan.kowalski@email.com");
 
-        entityManager.persistAndFlush(testKlient);
+        entityManager.persistAndFlush(testClient);
     }
 
     @Test
-    void shouldFindKlientByEmail() {
+    void shouldFindClientByEmail() {
         // given - dane w setUp()
 
         // when
-        Optional<Klient> result = klientRepository.findByEmail("jan.kowalski@email.com");
+        Optional<Client> result = clientRepository.findByEmail("jan.kowalski@email.com");
 
         // then
         assertTrue(result.isPresent());
-        assertEquals("Jan", result.get().getImie());
-        assertEquals("Kowalski", result.get().getNazwisko());
+        assertEquals("Jan", result.get().getFirstName());
+        assertEquals("Kowalski", result.get().getLastName());
         assertEquals("jan.kowalski@email.com", result.get().getEmail());
     }
 
@@ -53,7 +53,7 @@ class KlientRepositoryTest {
         // given - dane w setUp()
 
         // when
-        Optional<Klient> result = klientRepository.findByEmail("nieistniejacy@email.com");
+        Optional<Client> result = clientRepository.findByEmail("nieistniejacy@email.com");
 
         // then
         assertFalse(result.isPresent());
@@ -64,7 +64,7 @@ class KlientRepositoryTest {
         // given - dane w setUp()
 
         // when
-        boolean exists = klientRepository.existsByEmail("jan.kowalski@email.com");
+        boolean exists = clientRepository.existsByEmail("jan.kowalski@email.com");
 
         // then
         assertTrue(exists);
@@ -75,7 +75,7 @@ class KlientRepositoryTest {
         // given - dane w setUp()
 
         // when
-        boolean exists = klientRepository.existsByEmail("nieistniejacy@email.com");
+        boolean exists = clientRepository.existsByEmail("nieistniejacy@email.com");
 
         // then
         assertFalse(exists);

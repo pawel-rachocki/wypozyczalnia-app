@@ -1,122 +1,113 @@
 package com.wypozyczalnia.car_rental_backend.service;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Samochod;
-import com.wypozyczalnia.car_rental_backend.model.entity.StatusSamochodu;
+import com.wypozyczalnia.car_rental_backend.model.entity.Car;
+import com.wypozyczalnia.car_rental_backend.model.entity.CarStatus;
 import com.wypozyczalnia.car_rental_backend.model.exception.CarNotFoundException;
-import com.wypozyczalnia.car_rental_backend.repository.SamochodRepository;
+import com.wypozyczalnia.car_rental_backend.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SamochodService {
+public class CarService {
 
-    private final SamochodRepository samochodRepository;
+    private final CarRepository carRepository;
 
-    // ===== OPERACJE CRUD =====
-
-    public List<Samochod> findAll() {
-        return samochodRepository.findAll();
+    public List<Car> findAll() {
+        return carRepository.findAll();
     }
 
-    public Samochod findById(Long id) {
-        return samochodRepository.findById(id)
+    public Car findById(Long id) {
+        return carRepository.findById(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
     }
 
     @Transactional
-    public Samochod save(Samochod samochod) {
-        validateSamochod(samochod);
+    public Car save(Car car) {
+        validateSamochod(car);
 
-        if (samochod.getStatus() == null) {
-            samochod.setStatus(StatusSamochodu.DOSTEPNY);
+        if (car.getStatus() == null) {
+            car.setStatus(CarStatus.DOSTEPNY);
         }
 
-        return samochodRepository.save(samochod);
+        return carRepository.save(car);
     }
 
     @Transactional
-    public Samochod update(Long id, Samochod samochodUpdate) {
-        Samochod existing = samochodRepository.findById(id)
+    public Car update(Long id, Car carUpdate) {
+        Car existing = carRepository.findById(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
 
-        validateSamochod(samochodUpdate);
+        validateSamochod(carUpdate);
 
-        existing.setMarka(samochodUpdate.getMarka());
-        existing.setModel(samochodUpdate.getModel());
-        existing.setCenaZaDzien(samochodUpdate.getCenaZaDzien());
-        existing.setStatus(samochodUpdate.getStatus());
+        existing.setBrand(carUpdate.getBrand());
+        existing.setModel(carUpdate.getModel());
+        existing.setDailyPrice(carUpdate.getDailyPrice());
+        existing.setStatus(carUpdate.getStatus());
 
-        return samochodRepository.save(existing);
+        return carRepository.save(existing);
     }
 
     @Transactional
     public void delete(Long id) {
-        Samochod samochod = samochodRepository.findById(id)
+        Car car = carRepository.findById(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
 
-        if (StatusSamochodu.WYPOZYCZONY.equals(samochod.getStatus())) {
-            throw new IllegalStateException("Nie można usunąć wypożyczonego samochodu");
+        if (CarStatus.WYPOZYCZONY.equals(car.getStatus())) {
+            throw new IllegalStateException("Cannot delete rented car");
         }
 
-        samochodRepository.deleteById(id);
+        carRepository.deleteById(id);
     }
 
-    public List<Samochod> findAvailable() {
-        return samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY);
+    public List<Car> findAvailable() {
+        return carRepository.findByStatusOrderByBrandAscModelAsc(CarStatus.DOSTEPNY);
     }
 
     @Transactional
     public void markAsRented(Long id) {
-        Samochod samochod = samochodRepository.findById(id)
+        Car car = carRepository.findById(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
 
-        if (!StatusSamochodu.DOSTEPNY.equals(samochod.getStatus())) {
-            throw new IllegalStateException("Samochód nie jest dostępny do wypożyczenia");
+        if (!CarStatus.DOSTEPNY.equals(car.getStatus())) {
+            throw new IllegalStateException("Car is not available for rental");
         }
 
-        samochod.setStatus(StatusSamochodu.WYPOZYCZONY);
-        samochodRepository.save(samochod);
+        car.setStatus(CarStatus.WYPOZYCZONY);
+        carRepository.save(car);
     }
 
     @Transactional
     public void markAsAvailable(Long id) {
-        Samochod samochod = samochodRepository.findById(id)
+        Car car = carRepository.findById(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
 
-        samochod.setStatus(StatusSamochodu.DOSTEPNY);
-        samochodRepository.save(samochod);
+        car.setStatus(CarStatus.DOSTEPNY);
+        carRepository.save(car);
     }
 
     public boolean isAvailable(Long id) {
-        return samochodRepository.findById(id)
-                .map(samochod -> StatusSamochodu.DOSTEPNY.equals(samochod.getStatus()))
+        return carRepository.findById(id)
+                .map(samochod -> CarStatus.DOSTEPNY.equals(samochod.getStatus()))
                 .orElse(false);
     }
 
-    // ===== METODA WALIDACJI DANYCH =====
-
-    private void validateSamochod(Samochod samochod) {
-        if (samochod.getMarka() == null || samochod.getMarka().trim().isEmpty()) {
-            throw new IllegalArgumentException("Marka samochodu jest wymagana");
+    private void validateSamochod(Car car) {
+        if (car.getBrand() == null || car.getBrand().trim().isEmpty()) {
+            throw new IllegalArgumentException("Car Brand is required");
         }
 
-        if (samochod.getModel() == null || samochod.getModel().trim().isEmpty()) {
-            throw new IllegalArgumentException("Model samochodu jest wymagany");
+        if (car.getModel() == null || car.getModel().trim().isEmpty()) {
+            throw new IllegalArgumentException("Car model is required");
         }
 
-        if (samochod.getCenaZaDzien() == null || samochod.getCenaZaDzien().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Cena za dzień musi być większa od zera");
-        }
-
-        if (samochod.getCenaZaDzien().compareTo(new BigDecimal("10000")) > 0) {
-            throw new IllegalArgumentException("Cena za dzień nie może przekraczać 10 000 zł");
+        if (car.getDailyPrice() == null || car.getDailyPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Daily Price must be greater than zero");
         }
     }
 }

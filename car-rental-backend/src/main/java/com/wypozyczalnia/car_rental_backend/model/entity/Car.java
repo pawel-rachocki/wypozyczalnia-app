@@ -16,50 +16,42 @@ import java.util.List;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
-@Table(name = "samochody")
+@Table(name = "cars")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Samochod {
+public class Car {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Atrybut (marka) jest wymagany")
+    @NotBlank(message = "Brand is required")
     @Column(nullable = false,length = 50)
-    private String marka;
+    private String brand;
 
-    @NotBlank(message = "Atrybut (model) jest wymagany")
+    @NotBlank(message = "Model is required")
     @Column(nullable = false,length = 50)
     private String model;
 
-    @NotNull(message = "Atrybut (cena za dzień) jest wymagany")
-    @Positive(message = "Cena za dzień musi być większa od zera")
-    @Column(name = "cena_za_dzien", nullable = false, precision = 10, scale = 2)
-    private BigDecimal cenaZaDzien;
+    @NotNull(message = "Daily price is required")
+    @Positive(message = "Daily price must be greater than zero")
+    @Column(name = "daily_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal dailyPrice;
 
-    @NotNull(message = "Atrybut (status) jest wymagany")
+    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,length = 20)
-    private StatusSamochodu status;
+    private CarStatus status;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "samochod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Rental> rentals = new ArrayList<>();
 
-    public Samochod(String marka, String model, BigDecimal cenaZaDzien, StatusSamochodu status) {
-        this.marka = marka;
+    public Car(String brand, String model, BigDecimal dailyPrice, CarStatus status) {
+        this.brand = brand;
         this.model = model;
-        this.cenaZaDzien = cenaZaDzien;
+        this.dailyPrice = dailyPrice;
         this.status = status;
-    }
-
-    public String getFullName() {
-        return marka + " " + model;
-    }
-
-    public boolean isAvailable() {
-        return StatusSamochodu.DOSTEPNY.equals(status);
     }
 }

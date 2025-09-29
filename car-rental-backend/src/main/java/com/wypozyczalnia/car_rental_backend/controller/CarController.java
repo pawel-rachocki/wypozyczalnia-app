@@ -1,8 +1,8 @@
 package com.wypozyczalnia.car_rental_backend.controller;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Samochod;
+import com.wypozyczalnia.car_rental_backend.model.entity.Car;
 import com.wypozyczalnia.car_rental_backend.model.exception.CarNotFoundException;
-import com.wypozyczalnia.car_rental_backend.service.SamochodService;
+import com.wypozyczalnia.car_rental_backend.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,21 +15,20 @@ import java.util.List;
 @RequestMapping("/api/samochody")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-public class SamochodController {
+public class CarController {
 
-    private final SamochodService samochodService;
-
+    private final CarService carService;
 
     @GetMapping
-    public ResponseEntity<List<Samochod>> getAllSamochody() {
-        List<Samochod> samochody = samochodService.findAll();
-        return ResponseEntity.ok(samochody);
+    public ResponseEntity<List<Car>> getAllCars() {
+        List<Car> cars = carService.findAll();
+        return ResponseEntity.ok(cars);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Samochod> getSamochodById(@PathVariable Long id) {
+    public ResponseEntity<Car> getCarById(@PathVariable Long id) {
         try {
-            Samochod car = samochodService.findById(id);
+            Car car = carService.findById(id);
             return ResponseEntity.ok(car);
         } catch (CarNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -37,9 +36,9 @@ public class SamochodController {
     }
 
     @PostMapping
-    public ResponseEntity<Samochod> createSamochod(@Valid @RequestBody Samochod samochod) {
+    public ResponseEntity<Car> createCar(@Valid @RequestBody Car car) {
         try {
-            Samochod saved = samochodService.save(samochod);
+            Car saved = carService.save(car);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -47,31 +46,30 @@ public class SamochodController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Samochod> updateSamochod(@PathVariable Long id, @Valid @RequestBody Samochod samochod) {
+    public ResponseEntity<Car> updateCar(@PathVariable Long id, @Valid @RequestBody Car car) {
         try {
-            Samochod updated = samochodService.update(id, samochod);
+            Car updated = carService.update(id, car);
             return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
+        } catch (CarNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSamochod(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         try {
-            samochodService.delete(id);
+            carService.delete(id);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (CarNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
-    // ===== OPERACJE BIZNESOWE =====
     @GetMapping("/dostepne")
-    public ResponseEntity<List<Samochod>> getAvailableSamochody() {
-        List<Samochod> dostepne = samochodService.findAvailable();
-        return ResponseEntity.ok(dostepne);
+    public ResponseEntity<List<Car>> getAvailableCars() {
+        List<Car> available = carService.findAvailable();
+        return ResponseEntity.ok(available);
     }
 }

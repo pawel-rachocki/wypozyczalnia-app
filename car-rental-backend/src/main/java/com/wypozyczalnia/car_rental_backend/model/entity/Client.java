@@ -16,52 +16,48 @@ import java.util.List;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
-@Table(name = "klienci")
+@Table(name = "clients")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Klient {
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Atrybut (imię) jest wymagany")
-    @Size(min = 2, max = 50, message = "Imię musi zawierać od 2 do 50 znaków")
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 50, message = "First name must contain from 2 to 50 characters")
     @Column(nullable = false,length = 50)
-    private String imie;
+    private String firstName;
 
-    @NotBlank(message = "Atrybut (nazwisko) jest wymagany")
-    @Size(min = 2, max = 50, message = "Nazwisko musi zawierać od 2 do 50 znaków")
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 50, message = "Last name must contain from 2 to 50 characters")
     @Column(nullable = false,length = 50)
-    private String nazwisko;
+    private String lastName;
 
-    @NotBlank(message = "Atrybut (email) jest wymagany")
-    @Email(message = "Email musi mieć prawidłowy format")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must have a valid format")
     @Column(nullable = false,unique = true,length = 255)
     private String email;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Wypozyczenie> wypozyczenia = new ArrayList<>();
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Rental> rentals = new ArrayList<>();
 
-    public Klient(String imie, String nazwisko, String email) {
-        this.imie = imie;
-        this.nazwisko = nazwisko;
+    public Client(String firstName, String lastName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
     }
-
-    public String getFullName() {
-        return imie + " " + nazwisko;
-    }
-
     @Override
     public String toString() {
-        return "Klient{" +
+        return "Client{" +
                 "id=" + id +
-                ", imie='" + imie + '\'' +
-                ", nazwisko='" + nazwisko + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
+                ", rentals=" + rentals +
                 '}';
     }
 }

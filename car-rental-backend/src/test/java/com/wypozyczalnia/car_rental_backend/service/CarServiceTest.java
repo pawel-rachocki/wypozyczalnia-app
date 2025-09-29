@@ -1,9 +1,9 @@
 package com.wypozyczalnia.car_rental_backend.service;
 
-import com.wypozyczalnia.car_rental_backend.model.entity.Samochod;
-import com.wypozyczalnia.car_rental_backend.model.entity.StatusSamochodu;
+import com.wypozyczalnia.car_rental_backend.model.entity.Car;
+import com.wypozyczalnia.car_rental_backend.model.entity.CarStatus;
 import com.wypozyczalnia.car_rental_backend.model.exception.CarNotFoundException;
-import com.wypozyczalnia.car_rental_backend.repository.SamochodRepository;
+import com.wypozyczalnia.car_rental_backend.repository.CarRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,322 +22,292 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SamochodServiceTest {
+class CarServiceTest {
 
     @Mock
-    private SamochodRepository samochodRepository;
+    private CarRepository carRepository;
 
     @InjectMocks
-    private SamochodService samochodService;
+    private CarService carService;
 
-    private Samochod testSamochod;
-    private Samochod testSamochod2;
+    private Car testCar;
+    private Car testCar2;
 
     @BeforeEach
     void setUp() {
-        testSamochod = new Samochod();
-        testSamochod.setId(1L);
-        testSamochod.setMarka("Toyota");
-        testSamochod.setModel("Corolla");
-        testSamochod.setCenaZaDzien(BigDecimal.valueOf(100.00));
-        testSamochod.setStatus(StatusSamochodu.DOSTEPNY);
+        testCar = new Car();
+        testCar.setId(1L);
+        testCar.setBrand("Toyota");
+        testCar.setModel("Corolla");
+        testCar.setDailyPrice(BigDecimal.valueOf(100.00));
+        testCar.setStatus(CarStatus.DOSTEPNY);
 
-        testSamochod2 = new Samochod();
-        testSamochod2.setId(2L);
-        testSamochod2.setMarka("Honda");
-        testSamochod2.setModel("Civic");
-        testSamochod2.setCenaZaDzien(BigDecimal.valueOf(120.00));
-        testSamochod2.setStatus(StatusSamochodu.WYPOZYCZONY);
+        testCar2 = new Car();
+        testCar2.setId(2L);
+        testCar2.setBrand("Honda");
+        testCar2.setModel("Civic");
+        testCar2.setDailyPrice(BigDecimal.valueOf(120.00));
+        testCar2.setStatus(CarStatus.WYPOZYCZONY);
     }
 
-    // ===== TESTY FIND ALL =====
-
     @Test
-    void shouldReturnAllSamochody() {
+    void shouldReturnAllCars() {
         // given
-        List<Samochod> expectedSamochody = Arrays.asList(testSamochod, testSamochod2);
-        when(samochodRepository.findAll()).thenReturn(expectedSamochody);
+        List<Car> expectedSamochody = Arrays.asList(testCar, testCar2);
+        when(carRepository.findAll()).thenReturn(expectedSamochody);
 
         // when
-        List<Samochod> result = samochodService.findAll();
+        List<Car> result = carService.findAll();
 
         // then
         assertEquals(2, result.size());
-        assertEquals("Toyota", result.get(0).getMarka());
-        assertEquals("Honda", result.get(1).getMarka());
-        verify(samochodRepository, times(1)).findAll();
+        assertEquals("Toyota", result.get(0).getBrand());
+        assertEquals("Honda", result.get(1).getBrand());
+        verify(carRepository, times(1)).findAll();
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoSamochody() {
+    void shouldReturnEmptyListWhenNoCars() {
         // given
-        when(samochodRepository.findAll()).thenReturn(Arrays.asList());
+        when(carRepository.findAll()).thenReturn(Arrays.asList());
 
         // when
-        List<Samochod> result = samochodService.findAll();
+        List<Car> result = carService.findAll();
 
         // then
         assertTrue(result.isEmpty());
-        verify(samochodRepository, times(1)).findAll();
+        verify(carRepository, times(1)).findAll();
     }
 
-    // ===== TESTY FIND BY ID =====
-
     @Test
-    void shouldReturnSamochodWhenValidId() {
+    void shouldReturnCarWhenValidId() {
         // given
-        when(samochodRepository.findById(1L)).thenReturn(Optional.of(testSamochod));
+        when(carRepository.findById(1L)).thenReturn(Optional.of(testCar));
 
         // when
-        Samochod result = samochodService.findById(1L);
+        Car result = carService.findById(1L);
 
         // then
         assertNotNull(result);
-        assertEquals("Toyota", result.getMarka());
+        assertEquals("Toyota", result.getBrand());
         assertEquals("Corolla", result.getModel());
-        verify(samochodRepository, times(1)).findById(1L);
+        verify(carRepository, times(1)).findById(1L);
     }
 
     @Test
     void shouldReturnEmptyWhenInvalidId() {
         // given
-        when(samochodRepository.findById(999L)).thenReturn(Optional.empty());
+        when(carRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(CarNotFoundException.class, () -> samochodService.findById(999L));
+        assertThrows(CarNotFoundException.class, () -> carService.findById(999L));
     }
 
-    // ===== TESTY SAVE =====
-
     @Test
-    void shouldThrowExceptionWhenSavingWithNullMarka() {
+    void shouldThrowExceptionWhenSavingWithNullBrand() {
         // given
-        Samochod invalidSamochod = new Samochod(null, "Model", BigDecimal.valueOf(100.00), StatusSamochodu.DOSTEPNY);
+        Car invalidCar = new Car(null, "Model", BigDecimal.valueOf(100.00), CarStatus.DOSTEPNY);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> samochodService.save(invalidSamochod)
+                () -> carService.save(invalidCar)
         );
 
-        assertEquals("Marka samochodu jest wymagana", exception.getMessage());
-        verify(samochodRepository, never()).save(any(Samochod.class));
+        assertEquals("Car Brand is required", exception.getMessage());
+        verify(carRepository, never()).save(any(Car.class));
     }
 
     @Test
     void shouldThrowExceptionWhenSavingWithEmptyModel() {
         // given
-        Samochod invalidSamochod = new Samochod("Toyota", "", BigDecimal.valueOf(100.00), StatusSamochodu.DOSTEPNY);
+        Car invalidCar = new Car("Toyota", "", BigDecimal.valueOf(100.00), CarStatus.DOSTEPNY);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> samochodService.save(invalidSamochod)
+                () -> carService.save(invalidCar)
         );
 
-        assertEquals("Model samochodu jest wymagany", exception.getMessage());
-        verify(samochodRepository, never()).save(any(Samochod.class));
+        assertEquals("Car model is required", exception.getMessage());
+        verify(carRepository, never()).save(any(Car.class));
     }
 
     @Test
     void shouldThrowExceptionWhenSavingWithInvalidPrice() {
         // given
-        Samochod invalidSamochod = new Samochod("Toyota", "Corolla", BigDecimal.valueOf(-50.00), StatusSamochodu.DOSTEPNY);
+        Car invalidCar = new Car("Toyota", "Corolla", BigDecimal.valueOf(-50.00), CarStatus.DOSTEPNY);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> samochodService.save(invalidSamochod)
+                () -> carService.save(invalidCar)
         );
 
-        assertEquals("Cena za dzień musi być większa od zera", exception.getMessage());
-        verify(samochodRepository, never()).save(any(Samochod.class));
+        assertEquals("Daily Price must be greater than zero", exception.getMessage());
+        verify(carRepository, never()).save(any(Car.class));
     }
 
     @Test
-    void shouldThrowExceptionWhenSavingWithTooHighPrice() {
+    void shouldThrowExceptionWhenUpdatingNonExistentCar() {
         // given
-        Samochod invalidSamochod = new Samochod("Toyota", "Corolla", BigDecimal.valueOf(15000.00), StatusSamochodu.DOSTEPNY);
-
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> samochodService.save(invalidSamochod)
-        );
-
-        assertEquals("Cena za dzień nie może przekraczać 10 000 zł", exception.getMessage());
-        verify(samochodRepository, never()).save(any(Samochod.class));
-    }
-
-    // ===== TESTY UPDATE =====
-    @Test
-    void shouldThrowExceptionWhenUpdatingNonExistentSamochod() {
-        // given
-        Samochod updateData = new Samochod("Toyota", "Camry", BigDecimal.valueOf(150.00), StatusSamochodu.DOSTEPNY);
-        when(samochodRepository.findById(999L)).thenReturn(Optional.empty());
+        Car updateData = new Car("Toyota", "Camry", BigDecimal.valueOf(150.00), CarStatus.DOSTEPNY);
+        when(carRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
         CarNotFoundException exception = assertThrows(
                 CarNotFoundException.class,
-                () -> samochodService.update(999L, updateData)
-        );
-
-        assertEquals("Samochód o ID 999 nie istnieje", exception.getMessage());
-        verify(samochodRepository, times(1)).findById(999L);
-        verify(samochodRepository, never()).save(any(Samochod.class));
-    }
-
-    // ===== TESTY DELETE =====
-
-    @Test
-    void shouldDeleteAvailableSamochod() {
-        // given
-        when(samochodRepository.findById(1L)).thenReturn(Optional.of(testSamochod));
-        doNothing().when(samochodRepository).deleteById(1L);
-
-        // when
-        samochodService.delete(1L);
-
-        // then
-        verify(samochodRepository, times(1)).findById(1L);
-        verify(samochodRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingRentedSamochod() {
-        // given
-        when(samochodRepository.findById(2L)).thenReturn(Optional.of(testSamochod2));
-
-        // when & then
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> samochodService.delete(2L)
-        );
-
-        assertEquals("Nie można usunąć wypożyczonego samochodu", exception.getMessage());
-        verify(samochodRepository, times(1)).findById(2L);
-        verify(samochodRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingNonExistentSamochod() {
-        // given
-        when(samochodRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // when & then
-        CarNotFoundException exception = assertThrows(
-                CarNotFoundException.class,
-                () -> samochodService.delete(999L)
+                () -> carService.update(999L, updateData)
         );
 
         assertEquals("Car with id 999 not found.", exception.getMessage());
-        verify(samochodRepository, times(1)).findById(999L);
-        verify(samochodRepository, never()).deleteById(anyLong());
+        verify(carRepository, times(1)).findById(999L);
+        verify(carRepository, never()).save(any(Car.class));
     }
 
-    // ===== TESTY FIND AVAILABLE =====
-
     @Test
-    void shouldReturnAvailableSamochody() {
+    void shouldDeleteAvailableCar() {
         // given
-        List<Samochod> availableCars = Arrays.asList(testSamochod);
-        when(samochodRepository.findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY)).thenReturn(availableCars);
+        when(carRepository.findById(1L)).thenReturn(Optional.of(testCar));
+        doNothing().when(carRepository).deleteById(1L);
 
         // when
-        List<Samochod> result = samochodService.findAvailable();
+        carService.delete(1L);
 
         // then
-        assertEquals(1, result.size());
-        assertEquals(StatusSamochodu.DOSTEPNY, result.get(0).getStatus());
-        verify(samochodRepository, times(1)).findByStatusOrderByMarkaAscModelAsc(StatusSamochodu.DOSTEPNY);
-    }
-
-    // ===== TESTY MARK AS RENTED/AVAILABLE =====
-
-    @Test
-    void shouldMarkSamochodAsRented() {
-        // given
-        when(samochodRepository.findById(1L)).thenReturn(Optional.of(testSamochod));
-        when(samochodRepository.save(any(Samochod.class))).thenReturn(testSamochod);
-
-        // when
-        samochodService.markAsRented(1L);
-
-        // then
-        assertEquals(StatusSamochodu.WYPOZYCZONY, testSamochod.getStatus());
-        verify(samochodRepository, times(1)).findById(1L);
-        verify(samochodRepository, times(1)).save(testSamochod);
+        verify(carRepository, times(1)).findById(1L);
+        verify(carRepository, times(1)).deleteById(1L);
     }
 
     @Test
-    void shouldThrowExceptionWhenMarkingAlreadyRentedSamochod() {
+    void shouldThrowExceptionWhenDeletingRentedCar() {
         // given
-        when(samochodRepository.findById(2L)).thenReturn(Optional.of(testSamochod2));
+        when(carRepository.findById(2L)).thenReturn(Optional.of(testCar2));
 
         // when & then
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
-                () -> samochodService.markAsRented(2L)
+                () -> carService.delete(2L)
         );
 
-        assertEquals("Samochód nie jest dostępny do wypożyczenia", exception.getMessage());
-        verify(samochodRepository, times(1)).findById(2L);
-        verify(samochodRepository, never()).save(any(Samochod.class));
+        assertEquals("Cannot delete rented car", exception.getMessage());
+        verify(carRepository, times(1)).findById(2L);
+        verify(carRepository, never()).deleteById(anyLong());
     }
 
     @Test
-    void shouldMarkSamochodAsAvailable() {
+    void shouldThrowExceptionWhenDeletingNonExistentCar() {
         // given
-        when(samochodRepository.findById(2L)).thenReturn(Optional.of(testSamochod2));
-        when(samochodRepository.save(any(Samochod.class))).thenReturn(testSamochod2);
+        when(carRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // when & then
+        CarNotFoundException exception = assertThrows(
+                CarNotFoundException.class,
+                () -> carService.delete(999L)
+        );
+
+        assertEquals("Car with id 999 not found.", exception.getMessage());
+        verify(carRepository, times(1)).findById(999L);
+        verify(carRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void shouldReturnAvailableCars() {
+        // given
+        List<Car> availableCars = Arrays.asList(testCar);
+        when(carRepository.findByStatusOrderByBrandAscModelAsc(CarStatus.DOSTEPNY)).thenReturn(availableCars);
 
         // when
-        samochodService.markAsAvailable(2L);
+        List<Car> result = carService.findAvailable();
 
         // then
-        assertEquals(StatusSamochodu.DOSTEPNY, testSamochod2.getStatus());
-        verify(samochodRepository, times(1)).findById(2L);
-        verify(samochodRepository, times(1)).save(testSamochod2);
+        assertEquals(1, result.size());
+        assertEquals(CarStatus.DOSTEPNY, result.get(0).getStatus());
+        verify(carRepository, times(1)).findByStatusOrderByBrandAscModelAsc(CarStatus.DOSTEPNY);
     }
 
-    // ===== TESTY IS AVAILABLE =====
-
     @Test
-    void shouldReturnTrueWhenSamochodIsAvailable() {
+    void shouldMarkCarAsRented() {
         // given
-        when(samochodRepository.findById(1L)).thenReturn(Optional.of(testSamochod));
+        when(carRepository.findById(1L)).thenReturn(Optional.of(testCar));
+        when(carRepository.save(any(Car.class))).thenReturn(testCar);
 
         // when
-        boolean result = samochodService.isAvailable(1L);
+        carService.markAsRented(1L);
+
+        // then
+        assertEquals(CarStatus.WYPOZYCZONY, testCar.getStatus());
+        verify(carRepository, times(1)).findById(1L);
+        verify(carRepository, times(1)).save(testCar);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMarkingAlreadyRentedCar() {
+        // given
+        when(carRepository.findById(2L)).thenReturn(Optional.of(testCar2));
+
+        // when & then
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> carService.markAsRented(2L)
+        );
+
+        assertEquals("Car is not available for rental", exception.getMessage());
+        verify(carRepository, times(1)).findById(2L);
+        verify(carRepository, never()).save(any(Car.class));
+    }
+
+    @Test
+    void shouldMarkCarAsAvailable() {
+        // given
+        when(carRepository.findById(2L)).thenReturn(Optional.of(testCar2));
+        when(carRepository.save(any(Car.class))).thenReturn(testCar2);
+
+        // when
+        carService.markAsAvailable(2L);
+
+        // then
+        assertEquals(CarStatus.DOSTEPNY, testCar2.getStatus());
+        verify(carRepository, times(1)).findById(2L);
+        verify(carRepository, times(1)).save(testCar2);
+    }
+
+    @Test
+    void shouldReturnTrueWhenCarIsAvailable() {
+        // given
+        when(carRepository.findById(1L)).thenReturn(Optional.of(testCar));
+
+        // when
+        boolean result = carService.isAvailable(1L);
 
         // then
         assertTrue(result);
-        verify(samochodRepository, times(1)).findById(1L);
+        verify(carRepository, times(1)).findById(1L);
     }
 
     @Test
-    void shouldReturnFalseWhenSamochodIsRented() {
+    void shouldReturnFalseWhenCarIsRented() {
         // given
-        when(samochodRepository.findById(2L)).thenReturn(Optional.of(testSamochod2));
+        when(carRepository.findById(2L)).thenReturn(Optional.of(testCar2));
 
         // when
-        boolean result = samochodService.isAvailable(2L);
+        boolean result = carService.isAvailable(2L);
 
         // then
         assertFalse(result);
-        verify(samochodRepository, times(1)).findById(2L);
+        verify(carRepository, times(1)).findById(2L);
     }
 
     @Test
-    void shouldReturnFalseWhenSamochodNotExists() {
+    void shouldReturnFalseWhenCarNotExists() {
         // given
-        when(samochodRepository.findById(999L)).thenReturn(Optional.empty());
+        when(carRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when
-        boolean result = samochodService.isAvailable(999L);
+        boolean result = carService.isAvailable(999L);
 
         // then
         assertFalse(result);
-        verify(samochodRepository, times(1)).findById(999L);
+        verify(carRepository, times(1)).findById(999L);
     }
 }

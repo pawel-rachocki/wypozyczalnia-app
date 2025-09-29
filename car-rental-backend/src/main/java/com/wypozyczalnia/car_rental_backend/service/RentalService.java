@@ -2,7 +2,7 @@ package com.wypozyczalnia.car_rental_backend.service;
 
 import com.wypozyczalnia.car_rental_backend.model.entity.*;
 import com.wypozyczalnia.car_rental_backend.model.exception.RentalNotFoundException;
-import com.wypozyczalnia.car_rental_backend.repository.WypozyczenieRepository;
+import com.wypozyczalnia.car_rental_backend.repository.RentalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,32 +16,31 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class WypozyczenieService {
+public class RentalService {
 
-    private final WypozyczenieRepository wypozyczenieRepository;
-    private final SamochodService samochodService;
-    private final KlientService klientService;
+    private final RentalRepository rentalRepository;
+    private final CarService carService;
+    private final ClientService clientService;
 
-    // ===== OPERACJE CRUD =====
-
-    public List<Wypozyczenie> findAll() {
-        return wypozyczenieRepository.findAll();
+    public List<Rental> findAll() {
+        return rentalRepository.findAll();
     }
 
-    public Optional<Wypozyczenie> findById(Long id) {
-        return wypozyczenieRepository.findById(id);
+    public Rental findById(Long id) {
+        return rentalRepository.findById(id)
+                .orElseThrow(() -> new RentalNotFoundException(id));
     }
 
     @Transactional
-    public Wypozyczenie rentCar(Long klientId, Long samochodId, LocalDate dataWypozyczenia, LocalDate planowanaDataZwrotu) {
+    public Rental rentCar(Long klientId, Long samochodId, LocalDate dataWypozyczenia, LocalDate planowanaDataZwrotu) {
         validateRentalData(klientId, samochodId, dataWypozyczenia, planowanaDataZwrotu);
 
-        Klient klient = klientService.findById(klientId);
+        Client client = clientService.findById(klientId);
 
-        Samochod samochod = samochodService.findById(samochodId);
+        Car car = carService.findById(samochodId);
 
-        if (wypozyczenieRepository.existsBySamochodIdAndStatus(samochodId, StatusWypozyczenia.AKTYWNE)) {
-            throw new IllegalStateException("Samochód jest już wypożyczony");
+        if (rentalRepository.existsByCarIdAndStatus(samochodId, RentalStatus.AKTYWNE)) {
+            throw new IllegalStateException("Car already rented");
         }
 
         int liczbaDni = Period.between(dataWypozyczenia, planowanaDataZwrotu).getDays();
@@ -49,79 +48,77 @@ public class WypozyczenieService {
             liczbaDni = 1;
         }
 
-        BigDecimal kosztCalkowity = samochod.getCenaZaDzien()
+        BigDecimal totalCost = car.getDailyPrice()
                 .multiply(BigDecimal.valueOf(liczbaDni));
 
-        Wypozyczenie wypozyczenie = new Wypozyczenie(
-                klient, samochod, dataWypozyczenia, kosztCalkowity, planowanaDataZwrotu
+        Rental rental = new Rental(
+                client, car, dataWypozyczenia, totalCost, planowanaDataZwrotu
         );
 
-        Wypozyczenie savedRental = wypozyczenieRepository.save(wypozyczenie);
+        Rental savedRental = rentalRepository.save(rental);
 
-        samochodService.markAsRented(samochodId);
+        carService.markAsRented(samochodId);
 
         return savedRental;
     }
 
-    public List<Wypozyczenie> findByStatus(StatusWypozyczenia status) {
-        return wypozyczenieRepository.findByStatusOrderByDataWypozyczeniaDesc(status);
+    public List<Rental> findByStatus(RentalStatus status) {
+        return rentalRepository.findByStatusOrderByRentalDateDesc(status);
     }
 
-    public List<Wypozyczenie> findActiveRentals() {
-        return findByStatus(StatusWypozyczenia.AKTYWNE);
+    public List<Rental> findActiveRentals() {
+        return findByStatus(RentalStatus.AKTYWNE);
     }
 
     @Transactional
-    public Wypozyczenie returnCar(Long wypozyczenieId) {
+    public Rental returnCar(Long wypozyczenieId) {
         LocalDate dataZwrotu = LocalDate.now();
 
-        Wypozyczenie wypozyczenie = wypozyczenieRepository.findById(wypozyczenieId)
+        Rental rental = rentalRepository.findById(wypozyczenieId)
                 .orElseThrow(() -> new RentalNotFoundException(wypozyczenieId));
 
-        if (!StatusWypozyczenia.AKTYWNE.equals(wypozyczenie.getStatus())) {
-            throw new IllegalStateException("Wypożyczenie nie jest aktywne");
+        if (!RentalStatus.AKTYWNE.equals(rental.getStatus())) {
+            throw new IllegalStateException("Rental is not active");
         }
 
-        if (dataZwrotu.isBefore(wypozyczenie.getDataWypozyczenia())) {
-            wypozyczenie.setStatus(StatusWypozyczenia.ANULOWANE);
-            wypozyczenie.setDataZwrotu(dataZwrotu);
-            wypozyczenie.setKosztCalkowity(BigDecimal.ZERO);
+        if (dataZwrotu.isBefore(rental.getRentalDate())) {
+            rental.setStatus(RentalStatus.ANULOWANE);
+            rental.setReturnDate(dataZwrotu);
+            rental.setTotalCost(BigDecimal.ZERO);
         } else {
-            wypozyczenie.setDataZwrotu(dataZwrotu);
-            wypozyczenie.setStatus(StatusWypozyczenia.ZAKONCZONE);
+            rental.setReturnDate(dataZwrotu);
+            rental.setStatus(RentalStatus.ZAKONCZONE);
         }
 
-        Wypozyczenie updated = wypozyczenieRepository.save(wypozyczenie);
-        samochodService.markAsAvailable(wypozyczenie.getSamochod().getId());
+        Rental updated = rentalRepository.save(rental);
+        carService.markAsAvailable(rental.getCar().getId());
 
         return updated;
     }
 
-    // ===== METODY WALIDACJI DANYCH =====
-
-    private void validateRentalData(Long klientId, Long samochodId, LocalDate dataWypozyczenia, LocalDate planowanaDataZwrotu) {
-        if (klientId == null) {
-            throw new IllegalArgumentException("ID klienta jest wymagane");
+    private void validateRentalData(Long clientId, Long carId, LocalDate rentalDate, LocalDate plannedReturnDate) {
+        if (clientId == null) {
+            throw new IllegalArgumentException("Client ID is required");
         }
 
-        if (samochodId == null) {
-            throw new IllegalArgumentException("ID samochodu jest wymagane");
+        if (carId == null) {
+            throw new IllegalArgumentException("Car ID is required");
         }
 
-        if (dataWypozyczenia == null) {
-            throw new IllegalArgumentException("Data wypożyczenia jest wymagana");
+        if (rentalDate == null) {
+            throw new IllegalArgumentException("Rental date is required");
         }
 
-        if (planowanaDataZwrotu == null) {
-            throw new IllegalArgumentException("Planowana data zwrotu jest wymagana");
+        if (plannedReturnDate == null) {
+            throw new IllegalArgumentException("Planned return date is required");
         }
 
-        if (dataWypozyczenia.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Data wypożyczenia nie może być w przeszłości");
+        if (rentalDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Rental date cannot be in the past");
         }
 
-        if (planowanaDataZwrotu.isBefore(dataWypozyczenia) || planowanaDataZwrotu.isEqual(dataWypozyczenia)) {
-            throw new IllegalArgumentException("Data zwrotu musi być później niż data wypożyczenia");
+        if (plannedReturnDate.isBefore(rentalDate) || plannedReturnDate.isEqual(rentalDate)) {
+            throw new IllegalArgumentException("Return date must be later than rental date");
         }
 
     }
