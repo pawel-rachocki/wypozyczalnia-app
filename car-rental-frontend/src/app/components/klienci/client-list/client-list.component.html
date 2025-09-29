@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Zarządzanie klientami</h2>
-        <a routerLink="/clients/new" class="btn btn-primary">
+        <a routerLink="/klienci/new" class="btn btn-primary">
           Dodaj klienta
         </a>
       </div>
@@ -42,7 +42,7 @@
                 <td>{{ klient.email }}</td>
                 <td>
                   <div class="btn-group btn-group-sm" role="group">
-                    <a [routerLink]="['/clients/edit', klient.id]"
+                    <a [routerLink]="['/klienci/edit', klient.id]"
                        class="btn btn-outline-primary"
                        title="Edytuj">
                       Edytuj
@@ -61,7 +61,7 @@
             <!-- Brak danych -->
             <div *ngIf="clients.length === 0" class="text-center py-4">
               <p class="text-muted">Brak klientów w bazie danych</p>
-              <a routerLink="/clients/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
+              <a routerLink="/klienci/new" class="btn btn-primary">Dodaj pierwszego klienta</a>
             </div>
           </div>
         </div>
