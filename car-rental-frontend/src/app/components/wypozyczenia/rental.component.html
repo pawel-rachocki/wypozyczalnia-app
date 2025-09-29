@@ -1,0 +1,400 @@
+<div class="wypozyczenia-container">
+  <!-- Header -->
+  <div class="header">
+    <h2>Zarządzanie wypożyczeniami</h2>
+    <div class="header-actions">
+      <button
+        class="btn btn-primary"
+        (click)="setActiveTab('new')"
+        [disabled]="isLoading">
+        <i class="fas fa-plus"></i> Nowe wypożyczenie
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div *ngIf="error" class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    <div *ngIf="success" class="alert alert-success">
+      <i class="fas fa-check-circle"></i> {{ success }}
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'active'"
+      (click)="setActiveTab('active')">
+      <i class="fas fa-car"></i> Aktywne wypożyczenia ({{ activeRentals.length }})
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'all'"
+      (click)="setActiveTab('all')">
+      <i class="fas fa-list"></i> Wszystkie wypożyczenia ({{ wypozyczenia.length }})
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'new'"
+      (click)="setActiveTab('new')">
+      <i class="fas fa-plus-circle"></i> Nowe wypożyczenie
+    </button>
+  </div>
+
+  <!-- Active Rentals Tab -->
+  <div *ngIf="activeTab === 'active'" class="tab-content">
+    <div class="section-header">
+      <h3>Aktywne wypożyczenia</h3>
+      <div class="quick-stats">
+        <span class="stat-item">
+          <i class="fas fa-car"></i>
+          {{ activeRentals.length }} aktywnych
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="activeRentals.length === 0" class="empty-state">
+      <i class="fas fa-car-side fa-3x"></i>
+      <h4>Brak aktywnych wypożyczeń</h4>
+      <p>Obecnie nie ma żadnych aktywnych wypożyczeń w systemie.</p>
+    </div>
+
+    <div *ngIf="activeRentals.length > 0" class="rentals-grid">
+      <div *ngFor="let wypozyczenie of activeRentals" class="rental-card active-rental">
+        <div class="rental-header">
+          <div class="rental-status">
+            <span class="status-badge" [class]="getStatusClass(wypozyczenie.status)">
+              {{ wypozyczenie.status }}
+            </span>
+          </div>
+          <div class="rental-id">#{{ wypozyczenie.id }}</div>
+        </div>
+
+        <div class="rental-details">
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-user"></i> Klient:
+            </div>
+            <div class="detail-value">
+              {{ getKlientFullName(wypozyczenie.client) }}
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-car"></i> Samochód:
+            </div>
+            <div class="detail-value">
+              {{ getSamochodFullName(wypozyczenie.car) }}
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-calendar"></i> Data wypożyczenia:
+            </div>
+            <div class="detail-value">
+              {{ wypozyczenie.rentalDate | date:'dd.MM.yyyy' }}
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-money-bill"></i> Koszt:
+            </div>
+            <div class="detail-value cost">
+              {{ wypozyczenie.totalCost | currency:'PLN':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="rental-actions">
+          <button
+            class="btn btn-success btn-sm"
+            (click)="returnCar(wypozyczenie)"
+            [disabled]="isLoading">
+            <i class="fas fa-undo"></i> Zwróć samochód
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Rentals Tab -->
+  <div *ngIf="activeTab === 'all'" class="tab-content">
+    <div class="section-header">
+      <h3>Wszystkie wypożyczenia</h3>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label for="statusFilter">Status:</label>
+          <select id="statusFilter" [(ngModel)]="filterStatus" class="form-select">
+            <option value="">Wszystkie</option>
+            <option value="AKTYWNE">Aktywne</option>
+            <option value="ZAKONCZONE">Zakończone</option>
+            <option value="PRZETERMINOWANE">Przeterminowane</option>
+            <option value="ANULOWANE">Anulowane</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="klientFilter">Klient:</label>
+          <input
+            id="klientFilter"
+            type="text"
+            [(ngModel)]="filterKlient"
+            placeholder="Wyszukaj klienta..."
+            class="form-input">
+        </div>
+
+        <div class="filter-group">
+          <label>Sortowanie:</label>
+          <div class="sort-buttons">
+            <button
+              class="sort-btn"
+              [class.active]="sortBy === 'data'"
+              (click)="onSortChange('data')">
+              Data {{ sortBy === 'data' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
+            </button>
+            <button
+              class="sort-btn"
+              [class.active]="sortBy === 'klient'"
+              (click)="onSortChange('klient')">
+              Klient {{ sortBy === 'klient' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
+            </button>
+            <button
+              class="sort-btn"
+              [class.active]="sortBy === 'koszt'"
+              (click)="onSortChange('koszt')">
+              Koszt {{ sortBy === 'koszt' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rentals Table -->
+    <div *ngIf="filteredWypozyczenia.length === 0" class="empty-state">
+      <i class="fas fa-search fa-3x"></i>
+      <h4>Brak wyników</h4>
+      <p>Nie znaleziono wypożyczeń spełniających kryteria wyszukiwania.</p>
+    </div>
+
+    <div *ngIf="filteredWypozyczenia.length > 0" class="rentals-table-container">
+      <table class="rentals-table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th (click)="onSortChange('klient')" class="sortable">
+            Klient
+            <i *ngIf="sortBy === 'klient'"
+               class="fas"
+               [class.fa-sort-up]="sortDirection === 'asc'"
+               [class.fa-sort-down]="sortDirection === 'desc'"></i>
+          </th>
+          <th (click)="onSortChange('samochod')" class="sortable">
+            Samochód
+            <i *ngIf="sortBy === 'samochod'"
+               class="fas"
+               [class.fa-sort-up]="sortDirection === 'asc'"
+               [class.fa-sort-down]="sortDirection === 'desc'"></i>
+          </th>
+          <th (click)="onSortChange('data')" class="sortable">
+            Data wypożyczenia
+            <i *ngIf="sortBy === 'data'"
+               class="fas"
+               [class.fa-sort-up]="sortDirection === 'asc'"
+               [class.fa-sort-down]="sortDirection === 'desc'"></i>
+          </th>
+          <th>Data zwrotu</th>
+          <th (click)="onSortChange('koszt')" class="sortable">
+            Koszt
+            <i *ngIf="sortBy === 'koszt'"
+               class="fas"
+               [class.fa-sort-up]="sortDirection === 'asc'"
+               [class.fa-sort-down]="sortDirection === 'desc'"></i>
+          </th>
+          <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let wypozyczenie of filteredWypozyczenia">
+          <td>{{ wypozyczenie.id }}</td>
+          <td>
+              <span class="status-badge" [class]="getStatusClass(wypozyczenie.status)">
+                {{ wypozyczenie.status }}
+              </span>
+          </td>
+          <td>
+            <div class="client-info">
+              <strong>{{ getKlientFullName(wypozyczenie.client) }}</strong>
+              <small>{{ wypozyczenie.client.email }}</small>
+            </div>
+          </td>
+          <td>{{ getSamochodFullName(wypozyczenie.car) }}</td>
+          <td>{{ wypozyczenie.rentalDate | date:'dd.MM.yyyy' }}</td>
+          <td>
+              <span *ngIf="wypozyczenie.returnDate">
+                {{ wypozyczenie.returnDate | date:'dd.MM.yyyy' }}
+              </span>
+            <span *ngIf="!wypozyczenie.returnDate" class="text-muted">-</span>
+          </td>
+          <td class="cost">{{ wypozyczenie.totalCost | currency:'PLN':'symbol':'1.2-2' }}</td>
+          <td>
+            <button
+              *ngIf="wypozyczenie.status === 'AKTYWNE'"
+              class="btn btn-success btn-sm"
+              (click)="returnCar(wypozyczenie)"
+              [disabled]="isLoading">
+              <i class="fas fa-undo"></i> Zwróć
+            </button>
+            <span *ngIf="wypozyczenie.status !== 'AKTYWNE'" class="text-muted">-</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- New Rental Tab -->
+  <div *ngIf="activeTab === 'new'" class="tab-content">
+    <div class="section-header">
+      <h3>Nowe wypożyczenie</h3>
+    </div>
+
+    <div class="new-rental-form">
+      <form [formGroup]="wypozyczenieForm" (ngSubmit)="onSubmitRental()">
+        <div class="form-grid">
+          <!-- Client Selection -->
+          <div class="form-group">
+            <label for="clientId" class="required">Klient</label>
+            <select
+              id="clientId"
+              formControlName="clientId"
+              class="form-select"
+              [class.invalid]="isFieldInvalid('clientId')">
+              <option value="">Wybierz klienta</option>
+              <option *ngFor="let klient of klienci" [value]="klient.id">
+                {{ getKlientFullName(klient) }} - {{ klient.email }}
+              </option>
+            </select>
+            <div *ngIf="isFieldInvalid('clientId')" class="error-message">
+              {{ getFieldError('clientId') }}
+            </div>
+          </div>
+
+          <!-- Car Selection -->
+          <div class="form-group">
+            <label for="carId" class="required">Samochód</label>
+            <select
+              id="carId"
+              formControlName="carId"
+              class="form-select"
+              [class.invalid]="isFieldInvalid('carId')">
+              <option value="">Wybierz samochód</option>
+              <option *ngFor="let samochod of dostepneSamochody" [value]="samochod.id">
+                {{ getSamochodFullName(samochod) }} - {{ samochod.dailyPrice | currency:'PLN':'symbol':'1.2-2' }}/dzień
+              </option>
+            </select>
+            <div *ngIf="isFieldInvalid('carId')" class="error-message">
+              {{ getFieldError('carId') }}
+            </div>
+            <div *ngIf="dostepneSamochody.length === 0" class="info-message">
+              <i class="fas fa-info-circle"></i> Brak dostępnych samochodów
+            </div>
+          </div>
+
+          <!-- Rental Date -->
+          <div class="form-group">
+            <label for="dataWypozyczenia" class="required">Data wypożyczenia</label>
+            <input
+              type="date"
+              id="dataWypozyczenia"
+              formControlName="rentalDate"
+              class="form-input"
+              [class.invalid]="isFieldInvalid('rentalDate')"
+              [min]="getCurrentDate()">
+            <div *ngIf="isFieldInvalid('rentalDate')" class="error-message">
+              {{ getFieldError('rentalDate') }}
+            </div>
+          </div>
+
+          <!-- Return Date -->
+          <div class="form-group">
+            <label for="planowanaDataZwrotu" class="required">Planowana data zwrotu</label>
+            <input
+              type="date"
+              id="planowanaDataZwrotu"
+              formControlName="plannedReturnDate"
+              class="form-input"
+              [class.invalid]="isFieldInvalid('plannedReturnDate')"
+              [min]="wypozyczenieForm.get('rentalDate')?.value">
+            <div *ngIf="isFieldInvalid('plannedReturnDate')" class="error-message">
+              {{ getFieldError('plannedReturnDate') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Preview -->
+        <div *ngIf="estimatedCost > 0" class="cost-preview">
+          <div class="cost-preview-header">
+            <i class="fas fa-calculator"></i>
+            <h4>Przewidywany koszt</h4>
+          </div>
+          <div class="cost-breakdown">
+            <div class="cost-item">
+              <span>Liczba dni:</span>
+              <span>{{ getDaysDifference() }}</span>
+            </div>
+            <div class="cost-item">
+              <span>Cena za dzień:</span>
+              <span>{{ getSelectedCarPrice() | currency:'PLN':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="cost-total">
+              <span>Łączny koszt:</span>
+              <span class="total-amount">{{ estimatedCost | currency:'PLN':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="setActiveTab('active')">
+            <i class="fas fa-times"></i> Anuluj
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!wypozyczenieForm.valid || isLoading || dostepneSamochody.length === 0">
+            <i class="fas fa-car"></i>
+            <span *ngIf="!isLoading">Wypożycz samochód</span>
+            <span *ngIf="isLoading">Wypożyczanie...</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Form Validation Summary -->
+      <div *ngIf="shouldShowValidationSummary()" class="validation-summary">
+        <h5><i class="fas fa-exclamation-triangle"></i> Uzupełnij następujące pola:</h5>
+        <ul>
+          <li *ngIf="!isKlientValid">Wybierz klienta</li>
+          <li *ngIf="!isSamochodValid">Wybierz samochód</li>
+          <li *ngIf="!isDateValid">Wprowadź poprawne daty</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
